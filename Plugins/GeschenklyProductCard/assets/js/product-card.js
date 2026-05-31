@@ -33,7 +33,7 @@ jQuery(document).ready(function($) {
         method: 'GET',
         success: function(data) {
             const popularityElement = document.getElementById('popularityValue');
-            if (data.category !== undefined) {
+            if (data && data.category) {
                 let popularityText = `(${data.category})`;
                 popularityElement.innerHTML = popularityText;
 
@@ -65,7 +65,7 @@ jQuery(document).ready(function($) {
         method: 'GET',
         success: function(data) {
             const trendElement = document.getElementById('popularityTrend');
-            if (data.trend !== undefined) {
+            if (data && data.trend !== undefined && data.trend !== null) {
                 const trendText = `${data.direction === 'up' ? '↑' : '↓'} ${Math.abs(data.trend)}% diese Woche`;
                 trendElement.textContent = trendText;
                 trendElement.className = `trend trend-${data.direction}`;

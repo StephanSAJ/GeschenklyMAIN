@@ -386,10 +386,8 @@ class Geschenkly_Analytics_REST {
 	/* --------------------------------------------------------------------- */
 
 	public function like( $request ) {
-		if ( ! $this->verify_nonce( $request ) ) {
-			return new WP_Error( 'geschenkly_forbidden', 'Invalid nonce', array( 'status' => 403 ) );
-		}
-
+		// Ohne harte Nonce-Pruefung, damit es hinter Full-Page-Cache funktioniert
+		// (eingebettete Nonces sind dort abgelaufen). Nur unkritische Like-Telemetrie.
 		$params     = $request->get_json_params();
 		$product_id = isset( $params['productId'] ) ? intval( $params['productId'] ) : 0;
 		if ( ! $product_id ) {
@@ -421,10 +419,8 @@ class Geschenkly_Analytics_REST {
 	}
 
 	public function feedback( $request ) {
-		if ( ! $this->verify_nonce( $request ) ) {
-			return new WP_Error( 'geschenkly_forbidden', 'Invalid nonce', array( 'status' => 403 ) );
-		}
-
+		// Ohne harte Nonce-Pruefung (Cache-Kompatibilitaet). Feedback wird beim
+		// Speichern via sanitize_textarea_field bereinigt (Tags werden entfernt).
 		$params     = $request->get_json_params();
 		$product_id = isset( $params['productId'] ) ? intval( $params['productId'] ) : 0;
 		$feedback   = isset( $params['feedback'] ) ? sanitize_textarea_field( $params['feedback'] ) : '';
@@ -479,10 +475,5 @@ class Geschenkly_Analytics_REST {
 		}
 
 		return $better + 1;
-	}
-
-	private function verify_nonce( $request ) {
-		$nonce = $request->get_header( 'X-WP-Nonce' );
-		return $nonce && wp_verify_nonce( $nonce, 'wp_rest' );
 	}
 }

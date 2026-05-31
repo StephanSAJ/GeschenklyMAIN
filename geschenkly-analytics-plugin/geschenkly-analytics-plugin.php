@@ -193,12 +193,9 @@ class Geschenkly_Analytics_Plugin {
 	 * AJAX-Callback: erfasst einen Klick lokal (statt ihn an eine externe API zu senden).
 	 */
 	public function update_rating_callback() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'geschenkly_event' ) ) {
-			wp_send_json_error( 'Invalid nonce' );
-			return;
-		}
-
+		// Bewusst ohne harte Nonce-Pruefung: dieser Tracking-Endpunkt muss auch
+		// hinter Full-Page-Cache funktionieren (dort sind eingebettete Nonces
+		// laengst abgelaufen). Es werden nur unkritische Klick-Telemetriedaten erfasst.
 		if ( empty( $_POST['post_id'] ) || empty( $_POST['post_title'] ) ) {
 			wp_send_json_error( 'Missing post_id or post_title' );
 			return;
