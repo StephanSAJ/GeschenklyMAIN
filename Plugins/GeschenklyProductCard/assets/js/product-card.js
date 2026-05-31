@@ -1,9 +1,12 @@
+// Lokale WordPress-REST-API (ersetzt den früheren externen Analytics-Server).
+const API_BASE = geschenklyProductData.restUrl;
+
 jQuery(document).ready(function($) {
     const productId = geschenklyProductData.productId;
 
     // Laden der Popularitätsdaten
     $.ajax({
-        url: `https://schindler-ventures.de:3002/api/analytics/popularity/${productId}`,
+        url: `${API_BASE}analytics/popularity/${productId}`,
         method: 'GET',
         success: function(data) {
             const popularityElement = document.getElementById('popularityValue');
@@ -35,7 +38,7 @@ jQuery(document).ready(function($) {
 
     // Laden der Trenddaten
     $.ajax({
-        url: `https://schindler-ventures.de:3002/api/analytics/trend/${productId}`,
+        url: `${API_BASE}analytics/trend/${productId}`,
         method: 'GET',
         success: function(data) {
             const trendElement = document.getElementById('popularityTrend');
@@ -55,7 +58,7 @@ jQuery(document).ready(function($) {
 
     // Laden der monatlichen Kaufwünsche
     $.ajax({
-        url: `https://schindler-ventures.de:3002/api/analytics/monthly-clicks/${productId}`,
+        url: `${API_BASE}analytics/monthly-clicks/${productId}`,
         method: 'GET',
         success: function(data) {
             const clicksElement = document.getElementById('monthlyClicks');
@@ -75,7 +78,7 @@ jQuery(document).ready(function($) {
 
     // Laden der stündlichen Klickdaten
     $.ajax({
-        url: `https://schindler-ventures.de:3002/api/analytics/hourly/${productId}`,
+        url: `${API_BASE}analytics/hourly/${productId}`,
         method: 'GET',
         success: function(data) {
             const currentHour = new Date().getHours();
@@ -120,7 +123,7 @@ jQuery(document).ready(function($) {
 
     // Laden der Daten für das Kategorien-Chart
     $.ajax({
-        url: `https://schindler-ventures.de:3002/api/analytics/top-categories-tags/${productId}`,
+        url: `${API_BASE}analytics/top-categories-tags/${productId}`,
         method: 'GET',
         success: function(data) {
             const topCategories = data.topCategories.map(item => item._id.category_name);
@@ -179,7 +182,7 @@ jQuery(document).ready(function($) {
 
     // Initiales Laden der Like-Zahl
   // $.ajax({
-  //     url: `https://schindler-ventures.de:3002/api/like/${productId}`,
+  //     url: `${API_BASE}like/${productId}`,
   //     method: 'GET',
   //     success: function(data) {
   //         document.getElementById('likesValue').textContent = data.likeCount;
@@ -198,7 +201,7 @@ function showTrendChart() {
     trendChartContainer.style.display = 'block';
 
     $.ajax({
-        url: `https://schindler-ventures.de:3002/api/analytics/trend-details/${productId}`,
+        url: `${API_BASE}analytics/trend-details/${productId}`,
         method: 'GET',
         success: function(data) {
             // Sort the data by week in ascending order
@@ -240,10 +243,11 @@ function likeGift() {
 
     if (liked) {
         $.ajax({
-            url: 'https://schindler-ventures.de:3002/api/like',
+            url: API_BASE + 'like',
             method: 'POST',
             data: JSON.stringify({ productId }),
             contentType: 'application/json',
+            headers: { 'X-WP-Nonce': geschenklyProductData.nonce },
             success: function(data) {
                 likeButton.innerHTML = '❤️';
                 likesValue.textContent = parseInt(likesValue.textContent) + 1;
@@ -269,10 +273,11 @@ function submitFeedback() {
         alert('Bitte geben Sie Ihr Feedback ein.');
     } else {
         $.ajax({
-            url: 'https://schindler-ventures.de:3002/api/feedback',
+            url: API_BASE + 'feedback',
             method: 'POST',
             data: JSON.stringify({ productId, feedback }),
             contentType: 'application/json',
+            headers: { 'X-WP-Nonce': geschenklyProductData.nonce },
             success: function(data) {
                 alert('Vielen Dank für Ihr Feedback!');
                 document.getElementById('feedback').value = '';

@@ -7,6 +7,7 @@ jQuery(document).ready(function($) {
             type: 'post',
             data: {
                 action: 'update_rating',
+                nonce: rjs.nonce,
                 rate: 1,
                 post_id: post_id,
                 post_title: post_title,

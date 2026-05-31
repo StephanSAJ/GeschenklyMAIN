@@ -621,7 +621,9 @@ function geschenkly_display_product_card() {
     // Localize the script with new data
     wp_localize_script('geschenkly-product-card-js', 'geschenklyProductData', array(
         'productId' => $post->ID,
-        'ajaxurl' => admin_url('admin-ajax.php')
+        'ajaxurl' => admin_url('admin-ajax.php'),
+        'restUrl' => esc_url_raw(rest_url('geschenkly/v1/')),
+        'nonce' => wp_create_nonce('wp_rest')
     ));
 }
 

@@ -6,6 +6,7 @@ jQuery(document).ready(function($) {
             type: 'post',
             data: {
                 action: 'update_rating',
+                nonce: rjs.nonce,
                 rate: 1, // Fester Wert für die Rate, um den Klick zu erfassen
                 post_id: post_id,
                 post_title: post_title,
