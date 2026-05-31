@@ -564,23 +564,23 @@ function geschenkly_display_product_card() {
                 </div>
 
                 <div class="analytics-item" style="grid-column: span 2;">
-                    Auf Geschenkly besonders beliebt für
+                    <p class="metric-label">Auf Geschenkly besonders beliebt für</p>
                     <div id="categoryChartContainer">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
             </div>
             <div class="analytics-section">
-                <p>Geschenkly Einblicke</p>
+                <p class="section-title">📊 Geschenkly Einblicke</p>
                 <div class="analytics-grid">
                     <div class="analytics-item">
-                        <p>Beliebtheit dieser Woche</p>
+                        <p class="metric-label">Beliebtheit dieser Woche</p>
                         <div class="analytics-value" id="popularityValue">Wird geladen...</div>
                         <div class="trend" id="popularityTrend">Trend wird berechnet...</div>
                         <button class="trend-button" onclick="showTrendChart()">TREND ANZEIGEN</button>
                     </div>
                     <div class="analytics-item">
-                        <p>Kaufwunsch letzte 30 Tage</p>
+                        <p class="metric-label">Kaufwunsch letzte 30 Tage</p>
                         <div class="analytics-value" id="monthlyClicks">Wird geladen...</div>
                         <div class="trend" id="clicksTrend">Trend wird berechnet...</div>
                     </div>
@@ -589,7 +589,7 @@ function geschenkly_display_product_card() {
                     <canvas id="trendChart"></canvas>
                 </div>
                 <div class="interest-section">
-                    <p>Aktuelles Interesse von anderen Geschenkly Nutzern</p>
+                    <p class="section-title">🔥 Aktuelles Interesse anderer Nutzer</p>
                     <div class="interest-visualization">
                         <div class="interest-bar">
                             <div class="interest-level" id="interestLevel"></div>
@@ -604,7 +604,7 @@ function geschenkly_display_product_card() {
                 </div>
                 <?php if (!empty($product_categories) && !is_wp_error($product_categories)): ?>
                 <div class="gift-categories">
-                    <p>Geschenkkategorien</p>
+                    <p class="section-title">🏷️ Geschenkkategorien</p>
                     <div class="attributes-tags">
                         <?php foreach ($product_categories as $category): ?>
                         <a href="<?php echo esc_url(get_term_link($category)); ?>" class="tag">
@@ -616,7 +616,7 @@ function geschenkly_display_product_card() {
                 <?php endif; ?>
             </div>
             <div class="feedback-section">
-                <p>Geschenkly besser machen</p>
+                <p class="section-title">💬 Geschenkly besser machen</p>
                 <label for="feedback">Für welchen Anlass oder welche Person würdest Du dieses Geschenk schenken?</label>
                 <input type="text" id="feedback" class="feedback-input" placeholder="z.B. Geburtstag, Mutter, Kollege...">
                 <button class="feedback-submit" onclick="submitFeedback()">Feedback senden</button>
