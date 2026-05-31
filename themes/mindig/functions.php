@@ -1070,4 +1070,111 @@ add_filter( 'rank_math/frontend/breadcrumb/items', function( $links, $breadcrumb
     return $links;
 }, 20, 2 );
 
+/**
+ * Kategorie-/Tag-Seiten: Die "Kategorien:"- bzw. "Tags:"-Linkliste in der
+ * Term-Beschreibung als saubere, klickbare Chips darstellen.
+ *
+ * Greift NUR auf Produkt-Kategorie- und Produkt-Tag-Archiven und NUR auf
+ * Absaetze/Zeilen, die mit einem dieser Labels beginnen. Die Intro-Links
+ * (z. B. "Vatertag") bleiben unveraendert. Reine CSS/JS-Loesung -> jederzeit
+ * gefahrlos reversibel, der gespeicherte Inhalt wird nicht veraendert.
+ */
+function geschenkly_term_chips() {
+    if ( ! function_exists( 'is_product_category' ) ) {
+        return;
+    }
+    if ( ! ( is_product_category() || is_product_tag() ) ) {
+        return;
+    }
+    ?>
+    <style id="geschenkly-term-chips">
+        .geschenkly-chip-row{
+            display:flex;
+            flex-wrap:wrap;
+            align-items:center;
+            gap:8px;
+            margin:16px 0;
+            line-height:1.4;
+        }
+        .geschenkly-chip-label{
+            font-weight:600;
+            color:#222;
+            margin-right:2px;
+        }
+        .geschenkly-chip-row a{
+            display:inline-flex;
+            align-items:center;
+            padding:6px 14px;
+            border:1px solid #e3e3e3;
+            border-radius:999px;
+            background:#f7f7f8;
+            color:#444 !important;
+            font-size:14px;
+            line-height:1.1;
+            text-decoration:none !important;
+            transition:background .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;
+        }
+        .geschenkly-chip-row a:hover,
+        .geschenkly-chip-row a:focus{
+            background:#f5b301;
+            border-color:#f5b301;
+            color:#fff !important;
+            box-shadow:0 2px 8px rgba(0,0,0,.12);
+        }
+        @media (max-width:600px){
+            .geschenkly-chip-row a{padding:5px 12px;font-size:13px;}
+        }
+    </style>
+    <script>
+    (function () {
+        var LABELS = ['Kategorien:', 'Kategorie:', 'Tags:', 'Tag:', 'Schlagwörter:', 'Schlagworte:'];
+
+        function isLabel(text) {
+            return LABELS.some(function (l) { return text.indexOf(l) === 0; });
+        }
+
+        // Mögliche Container der Beschreibung (WooCommerce: .term-description)
+        var scope = document.querySelector('.term-description') ||
+                    document.querySelector('#page-meta') ||
+                    document.querySelector('.woocommerce-products-header') ||
+                    document.querySelector('.entry-content') ||
+                    document.body;
+
+        var rows = scope.querySelectorAll('p, div, li');
+        Array.prototype.forEach.call(rows, function (el) {
+            if (!el.querySelector('a')) return;                 // muss Links enthalten
+            if (el.querySelector('.geschenkly-chip-row')) return; // keine Verschachtelung
+            var text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+            if (!isLabel(text)) return;                         // muss mit Label beginnen
+
+            el.classList.add('geschenkly-chip-row');
+
+            Array.prototype.slice.call(el.childNodes).forEach(function (node) {
+                if (node.nodeType !== 3) return;                // nur Textknoten
+                var raw = node.textContent;
+                var trimmed = raw.trim();
+                var matched = LABELS.find(function (l) {
+                    return trimmed.indexOf(l) === 0 && trimmed.length <= l.length + 1;
+                });
+                if (matched) {
+                    // Label in ein gestyltes <span> packen
+                    var span = document.createElement('span');
+                    span.className = 'geschenkly-chip-label';
+                    span.textContent = matched;
+                    el.replaceChild(span, node);
+                } else if (trimmed.replace(/[\s,]+/g, '') === '') {
+                    // reiner Komma-/Leerzeichen-Trenner -> entfernen
+                    el.removeChild(node);
+                } else {
+                    // sonstiger Text -> umschliessende Kommas entfernen
+                    node.textContent = raw.replace(/^[\s,]+/, '').replace(/[\s,]+$/, '');
+                }
+            });
+        });
+    })();
+    </script>
+    <?php
+}
+add_action( 'wp_footer', 'geschenkly_term_chips', 100 );
+
 ?>
