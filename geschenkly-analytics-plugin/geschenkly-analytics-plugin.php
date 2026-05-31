@@ -23,6 +23,7 @@ class Geschenkly_Analytics_Plugin {
 		add_action( 'wp_ajax_nopriv_update_rating', array( $this, 'update_rating_callback' ) );
 		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'add_data_attributes' ), 10 );
 		add_action( 'plugins_loaded', array( $this, 'maybe_upgrade_db' ) );
+		add_action( 'geschenkly_rollup_popularity', array( $this, 'rollup_popularity' ) );
 		add_action(
 			'rest_api_init',
 			function () {
@@ -70,6 +71,58 @@ class Geschenkly_Analytics_Plugin {
 
 		dbDelta( $sql );
 		update_option( 'geschenkly_analytics_db_version', GESCHENKLY_ANALYTICS_DB_VERSION );
+
+		// Stuendliches Popularitaets-Rollup einplanen (ersetzt den teuren Theme-Decay-Loop).
+		if ( ! wp_next_scheduled( 'geschenkly_rollup_popularity' ) ) {
+			wp_schedule_event( time() + 300, 'hourly', 'geschenkly_rollup_popularity' );
+		}
+	}
+
+	/**
+	 * Bei Deaktivierung den Cron wieder entfernen.
+	 */
+	public static function deactivate() {
+		$timestamp = wp_next_scheduled( 'geschenkly_rollup_popularity' );
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'geschenkly_rollup_popularity' );
+		}
+	}
+
+	/**
+	 * Pflegt einen zentralen, indizierbaren Popularitaets-Score je Produkt
+	 * (_geschenkly_pop_score) aus der Event-Tabelle. Ersetzt die per-Kategorie-
+	 * Meta-Explosion als Sortier-Grundlage.
+	 */
+	public function rollup_popularity() {
+		global $wpdb;
+
+		// Einmaliges Seeding: bestehende _homepage_rating-Werte als Startwert uebernehmen,
+		// damit die bisherige Reihenfolge erhalten bleibt, bevor genug Events vorliegen.
+		if ( ! get_option( 'geschenkly_pop_seeded' ) ) {
+			$wpdb->query(
+				"INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value)
+				 SELECT pm.post_id, '_geschenkly_pop_score', pm.meta_value
+				 FROM {$wpdb->postmeta} pm
+				 LEFT JOIN {$wpdb->postmeta} ex
+				   ON ex.post_id = pm.post_id AND ex.meta_key = '_geschenkly_pop_score'
+				 WHERE pm.meta_key = '_homepage_rating' AND ex.meta_id IS NULL"
+			);
+			update_option( 'geschenkly_pop_seeded', 1 );
+		}
+
+		// Zeitgewichteter Klick-Score je Produkt (letzte 30 Tage, juengere Klicks staerker).
+		$table = self::table_name();
+		$rows  = $wpdb->get_results(
+			"SELECT product_id,
+			        SUM(CASE WHEN created_at >= (UTC_TIMESTAMP() - INTERVAL 7 DAY) THEN 3 ELSE 1 END) AS score
+			 FROM {$table}
+			 WHERE event_type = 'click' AND created_at >= (UTC_TIMESTAMP() - INTERVAL 30 DAY)
+			 GROUP BY product_id"
+		);
+
+		foreach ( $rows as $row ) {
+			update_post_meta( (int) $row->product_id, '_geschenkly_pop_score', (float) $row->score );
+		}
 	}
 
 	/**
@@ -195,4 +248,5 @@ class Geschenkly_Analytics_Plugin {
 }
 
 register_activation_hook( __FILE__, array( 'Geschenkly_Analytics_Plugin', 'install' ) );
+register_deactivation_hook( __FILE__, array( 'Geschenkly_Analytics_Plugin', 'deactivate' ) );
 new Geschenkly_Analytics_Plugin();

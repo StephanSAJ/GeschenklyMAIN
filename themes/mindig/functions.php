@@ -321,64 +321,40 @@ function order_by_click_rate_post_clauses($args) {
 add_action( 'decrease_rating_five_percent', 'decrease_user_click_rating_five_percent' );
 function decrease_user_click_rating_five_percent()
 {
+    // Taeglicher Decay (-0,1%). Frueher: SELECT aller wp_posts + verschachtelte
+    // get_post_meta/update_post_meta-Schleifen ueber alle Kategorien & Tags pro Post
+    // (Hunderttausende DB-Writes/Tag). Jetzt: wenige indizierte Bulk-UPDATEs.
+    global $wpdb;
+
     try {
-        global $wpdb;
+        // 1) Custom rating-Spalte nur fuer veroeffentlichte Produkte abklingen lassen.
+        $wpdb->query(
+            "UPDATE {$wpdb->posts} SET rating = rating * 0.999
+             WHERE post_type = 'product' AND post_status = 'publish'"
+        );
 
-        $decrease_percent = 0.001;
-
-        // Decrease the rating for the post
-        $table_name = $wpdb->prefix . 'posts';
-        $wpdb->query("UPDATE $table_name SET rating = rating * (1 - $decrease_percent)");
-
-        // Get all the posts
-        $posts = $wpdb->get_results("SELECT ID FROM $table_name");
-
-        foreach ($posts as $post) {
-            $post_id = $post->ID;
-
-            // Decrease the rating for categories
-            $categories = get_the_terms($post_id, 'product_cat');
-            if (!empty($categories)) {
-                foreach ($categories as $category) {
-                    $category_id = $category->term_id;
-                    $rating_key = '_category_rating_' . $category_id;
-                    $rating = get_post_meta($post_id, $rating_key, true);
-
-                    if (!empty($rating)) {
-                        $new_rating = $rating * (1 - $decrease_percent);
-                        update_post_meta($post_id, $rating_key, $new_rating);
-                    }
-                }
-            }
-
-            // Decrease the rating for tags
-            $tags = get_the_terms($post_id, 'product_tag');
-            if (!empty($tags)) {
-                foreach ($tags as $tag) {
-                    $tag_id = $tag->term_id;
-                    $rating_key = '_tag_rating_' . $tag_id;
-                    $rating = get_post_meta($post_id, $rating_key, true);
-
-                    if (!empty($rating)) {
-                        $new_rating = $rating * (1 - $decrease_percent);
-                        update_post_meta($post_id, $rating_key, $new_rating);
-                    }
-                }
-            }
-			// Decrease the rating for the homepage
-            $rating_key = '_homepage_rating';
-            $rating = get_post_meta($post_id, $rating_key, true);
-
-            if (!empty($rating)) {
-                $new_rating = $rating * (1 - $decrease_percent);
-                update_post_meta($post_id, $rating_key, $new_rating);
-            }
+        // 2) Kategorie- und Tag-Ratings in je EINER indizierten Query abklingen lassen.
+        foreach ( array( '_category_rating_', '_tag_rating_' ) as $prefix ) {
+            $like = $wpdb->esc_like( $prefix ) . '%';
+            $wpdb->query(
+                $wpdb->prepare(
+                    "UPDATE {$wpdb->postmeta} SET meta_value = meta_value * 0.999
+                     WHERE meta_key LIKE %s AND meta_value <> '' AND ( meta_value + 0 ) > 0",
+                    $like
+                )
+            );
         }
 
-        echo "Ratings successfully decreased by 5%.";
-
-    } catch (Exception $e) {
-        echo 'Caught exception: ',  $e->getMessage(), "\n";
+        // 3) Homepage-Rating.
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$wpdb->postmeta} SET meta_value = meta_value * 0.999
+                 WHERE meta_key = %s AND meta_value <> '' AND ( meta_value + 0 ) > 0",
+                '_homepage_rating'
+            )
+        );
+    } catch ( Exception $e ) {
+        error_log( 'Geschenkly rating decay error: ' . $e->getMessage() );
     }
 }
 
@@ -619,6 +595,20 @@ function save_custom_product_rating_for_homepage($post_id, $post) {
 }
 
 
+/**
+ * Liefert den Meta-Key fuer die Archiv-Sortierung.
+ *
+ * Standard: bisheriges Verhalten (per-Kategorie/Tag/Homepage-Rating).
+ * Optional (Option 'geschenkly_use_event_sort' == 'yes'): zentraler, vom
+ * Analytics-Plugin gepflegter Popularitaets-Score '_geschenkly_pop_score'
+ * aus der indizierten Event-Tabelle. Erst nach Staging-Verifikation aktivieren.
+ */
+function geschenkly_sort_meta_key( $default_key ) {
+    return ( get_option( 'geschenkly_use_event_sort' ) === 'yes' )
+        ? '_geschenkly_pop_score'
+        : $default_key;
+}
+
 // Füge benutzerdefinierte Sortierung nach Bewertungen je nach Kategorie hinzu
 add_action('pre_get_posts', 'sort_products_by_custom_category_rating');
 function sort_products_by_custom_category_rating($query) {
@@ -627,7 +617,7 @@ function sort_products_by_custom_category_rating($query) {
         $category_id = $queried_object->term_id;
 
         // Ändere die Abfrage, um Produkte nach der benutzerdefinierten Bewertung für die aktuelle Kategorie zu sortieren
-        $query->set('meta_key', '_category_rating_' . $category_id);
+        $query->set('meta_key', geschenkly_sort_meta_key('_category_rating_' . $category_id));
         $query->set('orderby', 'meta_value_num');
         $query->set('order', 'DESC'); // Sortiere absteigend (höchste Bewertung zuerst)
     }
@@ -647,7 +637,7 @@ function sort_products_by_custom_tag_rating($query) {
         $tag_id = $queried_object->term_id;
 
         // Ändere die Abfrage, um Produkte nach der benutzerdefinierten Bewertung für das aktuelle Schlagwort zu sortieren
-        $query->set('meta_key', '_tag_rating_' . $tag_id);
+        $query->set('meta_key', geschenkly_sort_meta_key('_tag_rating_' . $tag_id));
         $query->set('orderby', 'meta_value_num');
         $query->set('order', 'DESC'); // Sortiere absteigend (höchste Bewertung zuerst)
     }
@@ -664,10 +654,14 @@ function get_post_tags($post_id) {
 // Funktion zum Anzeigen der Anzahl der Beiträge in einer Kategorie
 function show_post_count_in_category( $category_id ) {
     $args = array(
-        'post_type'      => 'post',
-        'post_status'    => 'publish',
-        'cat'            => $category_id,
-        'posts_per_page' => -1,
+        'post_type'              => 'post',
+        'post_status'            => 'publish',
+        'cat'                    => $category_id,
+        'posts_per_page'         => -1,
+        'fields'                 => 'ids',
+        'no_found_rows'          => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
     );
 
     $posts = new WP_Query( $args );
@@ -688,7 +682,11 @@ function show_product_count_in_category( $category_id ) {
                 'terms'    => $category_id,
             ),
         ),
-        'posts_per_page' => -1,
+        'posts_per_page'         => -1,
+        'fields'                 => 'ids',
+        'no_found_rows'          => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
     );
 
     $products = new WP_Query( $args );
@@ -709,7 +707,11 @@ function show_product_count_in_term( $term_id, $taxonomy ) {
                 'terms'    => $term_id,
             ),
         ),
-        'posts_per_page' => -1,
+        'posts_per_page'         => -1,
+        'fields'                 => 'ids',
+        'no_found_rows'          => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
     );
 
     $products = new WP_Query( $args );
@@ -752,7 +754,7 @@ add_filter( 'rank_math/frontend/title', 'rank_math_process_shortcodes_in_meta', 
 add_action('pre_get_posts', 'sort_products_by_custom_homepage_rating');
 function sort_products_by_custom_homepage_rating($query) {
     if (!is_admin() && $query->is_main_query() && is_shop()) {
-        $query->set('meta_key', '_homepage_rating');
+        $query->set('meta_key', geschenkly_sort_meta_key('_homepage_rating'));
         $query->set('orderby', 'meta_value_num');
         $query->set('order', 'DESC'); // Sortiere absteigend (höchste Bewertung zuerst)
     }
