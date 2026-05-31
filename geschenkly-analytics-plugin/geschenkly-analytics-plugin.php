@@ -24,6 +24,9 @@ class Geschenkly_Analytics_Plugin {
 		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'add_data_attributes' ), 10 );
 		add_action( 'plugins_loaded', array( $this, 'maybe_upgrade_db' ) );
 		add_action( 'geschenkly_rollup_popularity', array( $this, 'rollup_popularity' ) );
+		// Trending-Badge auf den Listing-/Kategorie-Karten (server-seitig, cache-sicher).
+		add_action( 'woocommerce_before_shop_loop_item_title', array( $this, 'render_trending_badge' ), 8 );
+		add_action( 'wp_head', array( $this, 'print_listing_badge_styles' ) );
 		add_action(
 			'rest_api_init',
 			function () {
@@ -124,10 +127,121 @@ class Geschenkly_Analytics_Plugin {
 			update_post_meta( (int) $row->product_id, '_geschenkly_pop_score', (float) $row->score );
 		}
 
+		// Trend-Flag je Produkt: diese Woche vs. Vorwoche. Erst alle zuruecksetzen
+		// (eine indizierte Query), dann fuer steigende Produkte auf 'up' setzen.
+		$wpdb->query(
+			"UPDATE {$wpdb->postmeta} SET meta_value = '' WHERE meta_key = '_geschenkly_trend' AND meta_value <> ''"
+		);
+		$trend_rows = $wpdb->get_results(
+			"SELECT product_id,
+			        SUM(CASE WHEN created_at >= (UTC_TIMESTAMP() - INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS this_week,
+			        SUM(CASE WHEN created_at <  (UTC_TIMESTAMP() - INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS last_week
+			 FROM {$table}
+			 WHERE event_type = 'click' AND created_at >= (UTC_TIMESTAMP() - INTERVAL 14 DAY)
+			 GROUP BY product_id"
+		);
+		foreach ( $trend_rows as $row ) {
+			// 'Im Trend' nur bei klarer Steigerung und etwas Volumen (vermeidet Rauschen).
+			if ( (int) $row->this_week >= 3 && (int) $row->this_week > (int) $row->last_week ) {
+				update_post_meta( (int) $row->product_id, '_geschenkly_trend', 'up' );
+			}
+		}
+
 		// View-Events sind nur fuer das Live-Badge relevant -> Tabelle schlank halten.
 		$wpdb->query(
 			"DELETE FROM {$table} WHERE event_type = 'view' AND created_at < ( UTC_TIMESTAMP() - INTERVAL 2 DAY )"
 		);
+
+		// Gecachte Top-Listen der Kategorien invalidieren, damit Badges aktuell bleiben.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_gky_topcat_ids_%' OR option_name LIKE '\_transient\_timeout\_gky_topcat_ids_%'"
+		);
+	}
+
+	/**
+	 * Liefert die Top-N-Produkt-IDs einer Kategorie nach _geschenkly_pop_score.
+	 * Ergebnis wird pro Kategorie zwischengespeichert (eine Query pro Archivseite).
+	 */
+	public static function top_products_in_category( $term_id, $limit = 3 ) {
+		$cache_key = 'gky_topcat_ids_' . $term_id . '_' . $limit;
+		$ids       = get_transient( $cache_key );
+		if ( false === $ids ) {
+			$ids = get_posts(
+				array(
+					'post_type'              => 'product',
+					'post_status'            => 'publish',
+					'fields'                 => 'ids',
+					'posts_per_page'         => $limit,
+					'meta_key'               => '_geschenkly_pop_score',
+					'orderby'                => 'meta_value_num',
+					'order'                  => 'DESC',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+					'tax_query'              => array(
+						array(
+							'taxonomy' => 'product_cat',
+							'field'    => 'term_id',
+							'terms'    => $term_id,
+						),
+					),
+				)
+			);
+			$ids = array_map( 'intval', $ids );
+			set_transient( $cache_key, $ids, HOUR_IN_SECONDS );
+		}
+		return $ids;
+	}
+
+	/**
+	 * Rendert genau EIN priorisiertes Badge je Listing-Karte:
+	 * 1) Top 3 in der aktuellen Kategorie, sonst 2) Im Trend, sonst nichts.
+	 */
+	public function render_trending_badge() {
+		global $product;
+		if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+			return;
+		}
+		$id    = $product->get_id();
+		$label = '';
+
+		if ( function_exists( 'is_product_category' ) && is_product_category() ) {
+			$term = get_queried_object();
+			if ( $term && ! is_wp_error( $term ) && isset( $term->term_id ) ) {
+				$top = self::top_products_in_category( $term->term_id, 3 );
+				$pos = array_search( (int) $id, $top, true );
+				if ( false !== $pos ) {
+					$label = '🏆 Top ' . ( $pos + 1 ) . ' in ' . $term->name;
+				}
+			}
+		}
+
+		if ( '' === $label && 'up' === get_post_meta( $id, '_geschenkly_trend', true ) ) {
+			$label = '🔥 Im Trend';
+		}
+
+		if ( '' === $label ) {
+			return;
+		}
+
+		echo '<span class="geschenkly-trend-badge">' . esc_html( $label ) . '</span>';
+	}
+
+	/**
+	 * Minimales Badge-CSS, nur auf Shop-/Kategorie-/Tag-Archiven (inline, kein Extra-Request).
+	 */
+	public function print_listing_badge_styles() {
+		if ( ! function_exists( 'is_shop' ) ) {
+			return;
+		}
+		if ( ! ( is_shop() || is_product_category() || is_product_tag() ) ) {
+			return;
+		}
+		echo '<style id="geschenkly-trend-badge-css">'
+			. '.geschenkly-trend-badge{display:inline-block;margin:6px 0 2px;padding:3px 10px;'
+			. 'border-radius:999px;background:#fff4e0;color:#8a5a00;border:1px solid #f0d8a6;'
+			. 'font-size:12px;font-weight:700;line-height:1.4;letter-spacing:.01em;}'
+			. '</style>';
 	}
 
 	/**

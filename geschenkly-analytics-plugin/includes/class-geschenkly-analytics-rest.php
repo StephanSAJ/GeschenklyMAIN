@@ -187,6 +187,14 @@ class Geschenkly_Analytics_REST {
 	 * 60s-Heartbeat die Zahlen nicht aufblaeht.
 	 */
 	private function live_snapshot( $product_id ) {
+		// Kurzer Cache (15s): glaettet die COUNT(DISTINCT)-Last bei vielen Heartbeats.
+		// Mit Redis-Object-Cache liegt der Transient im RAM statt in der DB.
+		$cache_key = 'gky_live_' . $product_id;
+		$cached    = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		global $wpdb;
 		$table = $this->table();
 
@@ -206,10 +214,13 @@ class Geschenkly_Analytics_REST {
 			)
 		);
 
-		return array(
+		$result = array(
 			'viewersNow' => max( 1, $viewers_now ),
 			'viewsToday' => $views_today,
 		);
+		set_transient( $cache_key, $result, 15 );
+
+		return $result;
 	}
 
 	/* --------------------------------------------------------------------- */
