@@ -1,0 +1,45 @@
+[submodule "plugin-fw"]
+	path = plugin-fw
+	url = https://bitbucket.org/yithemes/plugin-fw.git
+[submodule "modules/backup-reset"]
+	path = modules/backup-reset
+	url = https://bitbucket.org/yithemes/yit-framework.backup
+[submodule "modules/contact-form"]
+	path = modules/contact-form
+	url = https://bitbucket.org/yithemes/yit-framework.contactforms
+[submodule "modules/faq"]
+	path = modules/faq
+	url = https://bitbucket.org/yithemes/yit-framework.faq
+[submodule "modules/feature-tabs"]
+	path = modules/feature-tabs
+	url = https://bitbucket.org/yithemes/yit-framework.features-tab
+[submodule "modules/logos"]
+	path = modules/logos
+	url = https://bitbucket.org/yithemes/yit-framework.logos
+[submodule "modules/newsletter"]
+	path = modules/newsletter
+	url = https://bitbucket.org/yithemes/yit-framework.newsletter
+[submodule "modules/portfolio"]
+	path = modules/portfolio
+	url = https://bitbucket.org/yithemes/yit-framework.portfolio
+[submodule "modules/services"]
+	path = modules/services
+	url = https://bitbucket.org/yithemes/yit-framework.services
+[submodule "modules/shortcodes"]
+	path = modules/shortcodes
+	url = https://bitbucket.org/yithemes/yit-framework.shortcodes
+[submodule "modules/sidebars"]
+	path = modules/sidebar
+	url = https://bitbucket.org/yithemes/yit-framework.sidebars
+[submodule "modules/sitemap"]
+	path = modules/sitemap
+	url = https://bitbucket.org/yithemes/yit-framework.sitemap
+[submodule "modules/slider"]
+	path = modules/slider
+	url = https://bitbucket.org/yithemes/yit-framework.sliders
+[submodule "modules/team"]
+	path = modules/team
+	url = https://bitbucket.org/yithemes/yit-framework.team
+[submodule "modules/testimonial"]
+	path = modules/testimonial
+	url = https://bitbucket.org/yithemes/yit-framework.testimonials

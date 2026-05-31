@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Eigene globale Styles (optional) */
+body {
+ margin: 0;
+ padding: 0;
+}
