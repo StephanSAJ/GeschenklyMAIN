@@ -80,6 +80,36 @@ function geschenkly_conditional_assets() {
     }
 }
 
+/**
+ * Universell sichere Frontend-Entschlackung (zuvor im nie geladenen Child-_functions.php).
+ * Entfernt ungenutzte Core-Requests: wp-embed, Heartbeat (Frontend), Emoji-Skript.
+ */
+add_action( 'init', 'geschenkly_trim_core_assets' );
+function geschenkly_trim_core_assets() {
+    if ( ! is_admin() ) {
+        wp_deregister_script( 'wp-embed' );
+    }
+
+    // Heartbeat nur im Editor behalten.
+    global $pagenow;
+    if ( 'post.php' !== $pagenow && 'post-new.php' !== $pagenow ) {
+        wp_deregister_script( 'heartbeat' );
+    }
+
+    // Emoji-Skript/Styles entfernen.
+    remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+    remove_action( 'wp_print_styles', 'print_emoji_styles' );
+    remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+    remove_action( 'admin_print_styles', 'print_emoji_styles' );
+    remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+    remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
+    remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
+    add_filter( 'tiny_mce_plugins', 'geschenkly_remove_tinymce_emoji' );
+}
+function geschenkly_remove_tinymce_emoji( $plugins ) {
+    return is_array( $plugins ) ? array_diff( $plugins, array( 'wpemoji' ) ) : array();
+}
+
 add_action( 'send_headers', 'add_header_xua' );
 function add_header_xua() {
 header( 'Strict-Transport-Security: max-age=63072000; includeSubdomains; preload' );

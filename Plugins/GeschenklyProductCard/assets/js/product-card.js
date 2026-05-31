@@ -4,6 +4,29 @@ const API_BASE = geschenklyProductData.restUrl;
 jQuery(document).ready(function($) {
     const productId = geschenklyProductData.productId;
 
+    // --- Live-Badge: "X sehen sich das gerade an" ---------------------------
+    // Laeuft per JS, damit es auch hinter Full-Page-Cache aktualisiert. Der
+    // POST dient gleichzeitig als 60s-Heartbeat (Praesenz) und liefert die Zahlen.
+    function geschenklyPingView() {
+        $.ajax({
+            url: API_BASE + 'view',
+            method: 'POST',
+            data: JSON.stringify({ productId: productId }),
+            contentType: 'application/json',
+            success: function(data) {
+                const badge = document.getElementById('giftLiveBadge');
+                if (!badge || !data) return;
+                const viewers = document.getElementById('liveViewers');
+                const today = document.getElementById('viewsToday');
+                if (viewers) viewers.textContent = Number(data.viewersNow || 1).toLocaleString('de-DE');
+                if (today) today.textContent = Number(data.viewsToday || 0).toLocaleString('de-DE');
+                badge.hidden = false;
+            }
+        });
+    }
+    geschenklyPingView();
+    setInterval(geschenklyPingView, 60000);
+
     // Laden der Popularitätsdaten
     $.ajax({
         url: `${API_BASE}analytics/popularity/${productId}`,

@@ -123,6 +123,11 @@ class Geschenkly_Analytics_Plugin {
 		foreach ( $rows as $row ) {
 			update_post_meta( (int) $row->product_id, '_geschenkly_pop_score', (float) $row->score );
 		}
+
+		// View-Events sind nur fuer das Live-Badge relevant -> Tabelle schlank halten.
+		$wpdb->query(
+			"DELETE FROM {$table} WHERE event_type = 'view' AND created_at < ( UTC_TIMESTAMP() - INTERVAL 2 DAY )"
+		);
 	}
 
 	/**
@@ -232,7 +237,7 @@ class Geschenkly_Analytics_Plugin {
 	/**
 	 * Pseudonymer Session-Hash (IP + User-Agent + Salt) für Dedupe/Rate-Limiting.
 	 */
-	private static function client_session_hash() {
+	public static function client_session_hash() {
 		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 		$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
 		return md5( $ip . '|' . $ua . '|' . wp_salt() );

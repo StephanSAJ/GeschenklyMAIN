@@ -436,6 +436,14 @@ function geschenkly_display_product_card() {
     <div class="gift-card">
         <div class="gift-header">
             <h1 class="gift-title"><?php echo get_the_title($post->ID); ?></h1>
+            <div class="gift-live-badge" id="giftLiveBadge" hidden>
+                <span class="live-dot" aria-hidden="true"></span>
+                <span class="live-text">
+                    <strong id="liveViewers">–</strong>&nbsp;sehen sich das gerade an
+                    <span class="live-sep">·</span>
+                    <strong id="viewsToday">–</strong>&nbsp;mal heute angesehen
+                </span>
+            </div>
         </div>
         <div class="gift-content">
             <div class="gift-image-description">

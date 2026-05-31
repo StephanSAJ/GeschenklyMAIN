@@ -73,6 +73,70 @@ class Geschenkly_Analytics_REST {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		// Live-Badge: bewusst ohne Nonce, damit es auch hinter Full-Page-Cache
+		// funktioniert. Integritaet kommt aus DISTINCT Session-Hashes, nicht aus Nonces.
+		register_rest_route(
+			self::NS,
+			'/view',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'view' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Erfasst einen Produkt-View (Heartbeat) und liefert die Live-Kennzahlen zurueck.
+	 * Antwort: { viewersNow, viewsToday }
+	 */
+	public function view( $request ) {
+		$params     = $request->get_json_params();
+		$product_id = isset( $params['productId'] ) ? intval( $params['productId'] ) : 0;
+		if ( ! $product_id ) {
+			return new WP_Error( 'geschenkly_bad_request', 'Missing productId', array( 'status' => 400 ) );
+		}
+
+		Geschenkly_Analytics_Plugin::record_event(
+			array(
+				'product_id'   => $product_id,
+				'event_type'   => 'view',
+				'session_hash' => Geschenkly_Analytics_Plugin::client_session_hash(),
+			)
+		);
+
+		return rest_ensure_response( $this->live_snapshot( $product_id ) );
+	}
+
+	/**
+	 * Live-Kennzahlen je Produkt – beide auf DISTINCT Sessions, damit der
+	 * 60s-Heartbeat die Zahlen nicht aufblaeht.
+	 */
+	private function live_snapshot( $product_id ) {
+		global $wpdb;
+		$table = $this->table();
+
+		$viewers_now = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT session_hash) FROM {$table}
+				 WHERE product_id = %d AND event_type = 'view'
+				 AND created_at >= ( UTC_TIMESTAMP() - INTERVAL 180 SECOND )",
+				$product_id
+			)
+		);
+		$views_today = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT session_hash) FROM {$table}
+				 WHERE product_id = %d AND event_type = 'view' AND created_at >= UTC_DATE()",
+				$product_id
+			)
+		);
+
+		return array(
+			'viewersNow' => max( 1, $viewers_now ),
+			'viewsToday' => $views_today,
+		);
 	}
 
 	/* --------------------------------------------------------------------- */
