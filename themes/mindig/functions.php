@@ -34,7 +34,50 @@ function some_custom_berocket_aapf_template_full_content($template_content) {
 add_action( 'wp_enqueue_scripts', 'dequeue_woocommerce_cart_fragments_everywhere', 11);
 function dequeue_woocommerce_cart_fragments_everywhere() {
     // Entfernt das Skript wc-cart-fragments.js global
-    wp_dequeue_script('wc-cart-fragments'); 
+    wp_dequeue_script('wc-cart-fragments');
+}
+
+/* =========================================================================
+ * Geschenkly Performance Quick-Wins (Ladezeit / LCP)
+ * ========================================================================= */
+
+/**
+ * Resource-Hints: frueh die Verbindung zum Matomo-Host aufbauen, damit das
+ * (async geladene) Tracking-Skript nicht erst DNS+TLS aushandeln muss.
+ */
+add_action( 'wp_head', 'geschenkly_resource_hints', 1 );
+function geschenkly_resource_hints() {
+    echo '<link rel="preconnect" href="https://geschenklyanalytics.de" crossorigin>' . "\n";
+    echo '<link rel="dns-prefetch" href="https://geschenklyanalytics.de">' . "\n";
+}
+
+/**
+ * Schwere Slider-Skripte nur dort laden, wo sie gebraucht werden.
+ * Laeuft mit Prioritaet 105 – nach dem Framework-Enqueue (100).
+ */
+add_action( 'wp_enqueue_scripts', 'geschenkly_conditional_assets', 105 );
+function geschenkly_conditional_assets() {
+    if ( is_admin() ) {
+        return;
+    }
+
+    $is_wc = function_exists( 'is_woocommerce' )
+        && ( is_woocommerce() || is_cart() || is_checkout() || is_account_page() );
+    $is_utility = is_404() || is_search();
+
+    // MasterSlider (Hero-Slider) erscheint nicht auf WooCommerce-/Funktionsseiten.
+    if ( $is_wc || $is_utility ) {
+        wp_dequeue_script( 'masterslider-script' );
+        wp_dequeue_style( 'masterslider-style' );
+    }
+
+    // OwlCarousel/prettyPhoto auf reinen Funktionsseiten ohne Karussell entfernen.
+    if ( ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() || is_account_page() ) ) || $is_utility ) {
+        wp_dequeue_script( 'owl-carousel' );
+        wp_dequeue_style( 'owl-slider' );
+        wp_dequeue_script( 'prettyPhoto' );
+        wp_dequeue_style( 'prettyPhoto' );
+    }
 }
 
 add_action( 'send_headers', 'add_header_xua' );

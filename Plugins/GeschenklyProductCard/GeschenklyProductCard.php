@@ -379,7 +379,8 @@ add_action('save_post', 'geschenkly_save_product_card_data');
 function geschenkly_enqueue_assets() {
     if (is_product()) {
         wp_enqueue_style('geschenkly-style', plugin_dir_url(__FILE__) . 'assets/css/style.css');
-        wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array(), null, true);
+        // Chart.js lokal gehostet (gepinnte Version) statt vom CDN – spart einen externen Host & DNS/TLS-Handshake.
+        wp_enqueue_script('chart-js', plugin_dir_url(__FILE__) . 'assets/vendor/chart.umd.min.js', array(), '4.4.1', true);
         //wp_enqueue_script('geschenkly-script', plugin_dir_url(__FILE__) . 'assets/js/script.js', array('jquery', 'chart-js'), null, true);
         wp_enqueue_script('geschenkly-shop-button', plugin_dir_url(__FILE__) . 'assets/js/shop-button.js', array('jquery'), null, true);
         wp_enqueue_script('geschenkly-product-card-js', plugin_dir_url(__FILE__) . 'assets/js/product-card.js', array('jquery', 'chart-js'), null, true);
