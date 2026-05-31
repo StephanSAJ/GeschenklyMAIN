@@ -385,6 +385,9 @@ function geschenkly_enqueue_assets() {
         wp_enqueue_script('geschenkly-shop-button', plugin_dir_url(__FILE__) . 'assets/js/shop-button.js', array('jquery'), null, true);
         wp_enqueue_script('geschenkly-product-card-js', plugin_dir_url(__FILE__) . 'assets/js/product-card.js', array('jquery', 'chart-js'), null, true);
         wp_enqueue_script('wishlist-header.js', plugin_dir_url(__FILE__) . 'assets/js/wishlist-header.js', array('jquery'), null, true);
+        wp_localize_script('wishlist-header.js', 'geschenklyWishlist', array(
+            'restUrl' => esc_url_raw(rest_url('geschenkly/v1/wishlist')),
+        ));
     }
 }
 add_action('wp_enqueue_scripts', 'geschenkly_enqueue_assets');

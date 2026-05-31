@@ -85,6 +85,79 @@ class Geschenkly_Analytics_REST {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		// Wunschliste per E-Mail an den Nutzer (ersetzt den externen Dienst auf Port 3004).
+		register_rest_route(
+			self::NS,
+			'/wishlist',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'wishlist_email' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Versendet die gemerkten Produkte per E-Mail an die angegebene Adresse.
+	 * Antwort: { success, count } oder WP_Error.
+	 */
+	public function wishlist_email( $request ) {
+		$params = $request->get_json_params();
+		$email  = isset( $params['email'] ) ? sanitize_email( $params['email'] ) : '';
+		$ids    = ( isset( $params['productIds'] ) && is_array( $params['productIds'] ) )
+			? array_map( 'intval', $params['productIds'] )
+			: array();
+
+		if ( ! is_email( $email ) ) {
+			return new WP_Error( 'geschenkly_bad_email', 'Ungültige E-Mail-Adresse', array( 'status' => 400 ) );
+		}
+
+		$ids = array_slice( array_filter( array_unique( $ids ) ), 0, 100 );
+		if ( empty( $ids ) ) {
+			return new WP_Error( 'geschenkly_empty', 'Keine Produkte übergeben', array( 'status' => 400 ) );
+		}
+
+		$items = array();
+		foreach ( $ids as $id ) {
+			if ( 'publish' !== get_post_status( $id ) || 'product' !== get_post_type( $id ) ) {
+				continue;
+			}
+			$items[] = array(
+				'name' => get_the_title( $id ),
+				'url'  => get_permalink( $id ),
+			);
+		}
+		if ( empty( $items ) ) {
+			return new WP_Error( 'geschenkly_no_items', 'Keine gültigen Produkte gefunden', array( 'status' => 400 ) );
+		}
+
+		$blogname = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+		$subject  = sprintf( 'Deine Wunschliste bei %s', $blogname );
+
+		$lines   = array();
+		$lines[] = '<p>Hallo,</p>';
+		$lines[] = '<p>hier ist deine gespeicherte Wunschliste:</p>';
+		$lines[] = '<ul>';
+		foreach ( $items as $item ) {
+			$lines[] = '<li><a href="' . esc_url( $item['url'] ) . '">' . esc_html( $item['name'] ) . '</a></li>';
+		}
+		$lines[] = '</ul>';
+		$lines[] = '<p>Viel Freude beim Schenken!<br>' . esc_html( $blogname ) . '</p>';
+
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+		$sent    = wp_mail( $email, $subject, implode( "\n", $lines ), $headers );
+
+		if ( ! $sent ) {
+			return new WP_Error( 'geschenkly_mail_failed', 'E-Mail konnte nicht gesendet werden', array( 'status' => 500 ) );
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'count'   => count( $items ),
+			)
+		);
 	}
 
 	/**

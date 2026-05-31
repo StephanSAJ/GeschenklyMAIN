@@ -140,7 +140,7 @@ jQuery(document).ready(function($) {
             const email = $('#email-input').val();
             if (email) {
                 $.ajax({
-                    url: 'https://schindler-ventures.de:3004/api/receive-product-ids',
+                    url: geschenklyWishlist.restUrl,
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
