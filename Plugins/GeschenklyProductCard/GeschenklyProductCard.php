@@ -378,13 +378,21 @@ add_action('save_post', 'geschenkly_save_product_card_data');
 // Enqueue styles and scripts
 function geschenkly_enqueue_assets() {
     if (is_product()) {
-        wp_enqueue_style('geschenkly-style', plugin_dir_url(__FILE__) . 'assets/css/style.css');
+        $base = plugin_dir_path(__FILE__);
+        $url  = plugin_dir_url(__FILE__);
+        // filemtime als Version => Cache bricht automatisch bei jeder Dateiaenderung
+        // (verhindert, dass Browser/Page-Cache veraltetes CSS/JS ausliefern).
+        $css_ver  = file_exists($base . 'assets/css/style.css') ? filemtime($base . 'assets/css/style.css') : null;
+        $card_ver = file_exists($base . 'assets/js/product-card.js') ? filemtime($base . 'assets/js/product-card.js') : null;
+        $shop_ver = file_exists($base . 'assets/js/shop-button.js') ? filemtime($base . 'assets/js/shop-button.js') : null;
+        $wish_ver = file_exists($base . 'assets/js/wishlist-header.js') ? filemtime($base . 'assets/js/wishlist-header.js') : null;
+
+        wp_enqueue_style('geschenkly-style', $url . 'assets/css/style.css', array(), $css_ver);
         // Chart.js lokal gehostet (gepinnte Version) statt vom CDN – spart einen externen Host & DNS/TLS-Handshake.
-        wp_enqueue_script('chart-js', plugin_dir_url(__FILE__) . 'assets/vendor/chart.umd.min.js', array(), '4.4.1', true);
-        //wp_enqueue_script('geschenkly-script', plugin_dir_url(__FILE__) . 'assets/js/script.js', array('jquery', 'chart-js'), null, true);
-        wp_enqueue_script('geschenkly-shop-button', plugin_dir_url(__FILE__) . 'assets/js/shop-button.js', array('jquery'), null, true);
-        wp_enqueue_script('geschenkly-product-card-js', plugin_dir_url(__FILE__) . 'assets/js/product-card.js', array('jquery', 'chart-js'), null, true);
-        wp_enqueue_script('wishlist-header.js', plugin_dir_url(__FILE__) . 'assets/js/wishlist-header.js', array('jquery'), null, true);
+        wp_enqueue_script('chart-js', $url . 'assets/vendor/chart.umd.min.js', array(), '4.4.1', true);
+        wp_enqueue_script('geschenkly-shop-button', $url . 'assets/js/shop-button.js', array('jquery'), $shop_ver, true);
+        wp_enqueue_script('geschenkly-product-card-js', $url . 'assets/js/product-card.js', array('jquery', 'chart-js'), $card_ver, true);
+        wp_enqueue_script('wishlist-header.js', $url . 'assets/js/wishlist-header.js', array('jquery'), $wish_ver, true);
         wp_localize_script('wishlist-header.js', 'geschenklyWishlist', array(
             'restUrl' => esc_url_raw(rest_url('geschenkly/v1/wishlist')),
         ));
