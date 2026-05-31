@@ -96,6 +96,48 @@ class Geschenkly_Analytics_REST {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		// Klick-Erfassung (z. B. 'Zum Shop' auf der Produktseite) -> Interesse/Beliebtheit.
+		register_rest_route(
+			self::NS,
+			'/click',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'click' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Erfasst einen Klick (Interessensignal) fuer ein Produkt inkl. Primaer-
+	 * Kategorie/-Tag. Speist Beliebtheit/Rang/Trend/Interesse.
+	 */
+	public function click( $request ) {
+		$params     = $request->get_json_params();
+		$product_id = isset( $params['productId'] ) ? intval( $params['productId'] ) : 0;
+		if ( ! $product_id ) {
+			return new WP_Error( 'geschenkly_bad_request', 'Missing productId', array( 'status' => 400 ) );
+		}
+
+		$cats = get_the_terms( $product_id, 'product_cat' );
+		$cat  = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0] : null;
+		$tags = get_the_terms( $product_id, 'product_tag' );
+		$tag  = ( $tags && ! is_wp_error( $tags ) ) ? $tags[0] : null;
+
+		Geschenkly_Analytics_Plugin::record_event(
+			array(
+				'product_id'    => $product_id,
+				'event_type'    => 'click',
+				'category_id'   => $cat ? $cat->term_id : null,
+				'category_name' => $cat ? $cat->name : null,
+				'tag_id'        => $tag ? $tag->term_id : null,
+				'tag_name'      => $tag ? $tag->name : null,
+				'session_hash'  => Geschenkly_Analytics_Plugin::client_session_hash(),
+			)
+		);
+
+		return rest_ensure_response( array( 'success' => true ) );
 	}
 
 	/**

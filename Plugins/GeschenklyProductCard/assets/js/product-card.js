@@ -27,6 +27,22 @@ jQuery(document).ready(function($) {
     geschenklyPingView();
     setInterval(geschenklyPingView, 60000);
 
+    // 'Zum Shop'-Klick als Interessensignal erfassen (staerkstes Signal: Kaufabsicht).
+    // keepalive, damit der Request auch beim Oeffnen des neuen Tabs sicher rausgeht.
+    var shopBtn = document.getElementById('shopButton');
+    if (shopBtn) {
+        shopBtn.addEventListener('click', function() {
+            try {
+                fetch(API_BASE + 'click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId: productId }),
+                    keepalive: true
+                });
+            } catch (e) { /* Tracking darf den Klick nie blockieren */ }
+        });
+    }
+
     // Laden der Popularitätsdaten
     $.ajax({
         url: `${API_BASE}analytics/popularity/${productId}`,
