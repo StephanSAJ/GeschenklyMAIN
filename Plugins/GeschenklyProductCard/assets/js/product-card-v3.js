@@ -53,22 +53,12 @@ jQuery(document).ready(function($) {
         method: 'GET',
         success: function(data) {
             const popularityElement = document.getElementById('popularityValue');
+            const rankElement = document.getElementById('popularityRank');
             if (data && data.category) {
-                let popularityText = `(${data.category})`;
-                popularityElement.innerHTML = popularityText;
-
-                // Erstellen eines neuen Elements für den Rang
-                const rankElement = document.createElement('div');
-                rankElement.className = 'rank-note';
-                rankElement.textContent = `Rang ${data.rank} von ${data.totalProducts}`;
-                rankElement.style.fontSize = '10px';
-                rankElement.style.position = 'absolute';
-                rankElement.style.bottom = '5px';
-                rankElement.style.right = '5px';
-
-                // Fügen Sie das Rang-Element zum übergeordneten Element hinzu
-                popularityElement.parentElement.style.position = 'relative';
-                popularityElement.parentElement.appendChild(rankElement);
+                popularityElement.innerHTML = `(${data.category})`;
+                if (rankElement && data.rank && data.totalProducts) {
+                    rankElement.textContent = `Rang ${data.rank} von ${data.totalProducts}`;
+                }
             } else {
                 popularityElement.textContent = 'Noch keine Daten';
             }

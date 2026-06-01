@@ -367,6 +367,58 @@ body {
 }
 .analytics-section .analytics-item { background: var(--gk-panel); }
 
+/* --- KPI-Zeile (kompakte Einblicke-Kennzahlen) ------------------------- */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+.kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: var(--gk-panel);
+    border: 1px solid var(--gk-gold-border);
+    border-radius: var(--gk-radius-sm);
+    padding: 12px 14px;
+}
+.kpi-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--gk-muted);
+}
+.kpi-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--gk-gold-dark);
+    line-height: 1.2;
+}
+.kpi-rank {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gk-muted);
+}
+.kpi-rank:empty { display: none; }
+.kpi .trend { font-size: 12px; }
+.kpi .trend:empty { display: none; }
+.kpi .trend-button {
+    margin-top: 4px;
+    align-self: flex-start;
+    padding: 0;
+}
+.kpi-interest .interest-bar { margin-top: 5px; height: 12px; }
+.kpi-interest .interest-labels { font-size: 10px; margin-top: 5px; }
+.kpi-interest .interest-description {
+    font-size: 12px;
+    font-style: normal;
+    color: var(--gk-text);
+    text-align: left;
+    margin-top: 6px;
+}
+
 .metric-label {
     margin: 0;
     font-size: 12px;
@@ -520,6 +572,7 @@ body {
     .gift-image { margin: 0 0 16px; flex: 0 0 auto; align-self: center; max-width: 320px; }
     .gift-short-description { padding: 0; }
     .gift-summary { grid-template-columns: repeat(2, 1fr); }
+    .kpi-row { grid-template-columns: 1fr; }
     #shopButton { width: 92%; min-width: 0; font-size: 19px; }
 }
 

@@ -382,16 +382,16 @@ function geschenkly_enqueue_assets() {
         $url  = plugin_dir_url(__FILE__);
         // filemtime als Version => Cache bricht automatisch bei jeder Dateiaenderung
         // (verhindert, dass Browser/Page-Cache veraltetes CSS/JS ausliefern).
-        $css_ver  = file_exists($base . 'assets/css/style-v2.css') ? filemtime($base . 'assets/css/style-v2.css') : null;
-        $card_ver = file_exists($base . 'assets/js/product-card-v2.js') ? filemtime($base . 'assets/js/product-card-v2.js') : null;
+        $css_ver  = file_exists($base . 'assets/css/style-v3.css') ? filemtime($base . 'assets/css/style-v3.css') : null;
+        $card_ver = file_exists($base . 'assets/js/product-card-v3.js') ? filemtime($base . 'assets/js/product-card-v3.js') : null;
         $shop_ver = file_exists($base . 'assets/js/shop-button.js') ? filemtime($base . 'assets/js/shop-button.js') : null;
         $wish_ver = file_exists($base . 'assets/js/wishlist-header.js') ? filemtime($base . 'assets/js/wishlist-header.js') : null;
 
-        wp_enqueue_style('geschenkly-style', $url . 'assets/css/style-v2.css', array(), $css_ver);
+        wp_enqueue_style('geschenkly-style', $url . 'assets/css/style-v3.css', array(), $css_ver);
         // Chart.js lokal gehostet (gepinnte Version) statt vom CDN – spart einen externen Host & DNS/TLS-Handshake.
         wp_enqueue_script('chart-js', $url . 'assets/vendor/chart.umd.min.js', array(), '4.4.1', true);
         wp_enqueue_script('geschenkly-shop-button', $url . 'assets/js/shop-button.js', array('jquery'), $shop_ver, true);
-        wp_enqueue_script('geschenkly-product-card-js', $url . 'assets/js/product-card-v2.js', array('jquery', 'chart-js'), $card_ver, true);
+        wp_enqueue_script('geschenkly-product-card-js', $url . 'assets/js/product-card-v3.js', array('jquery', 'chart-js'), $card_ver, true);
         wp_enqueue_script('wishlist-header.js', $url . 'assets/js/wishlist-header.js', array('jquery'), $wish_ver, true);
         wp_localize_script('wishlist-header.js', 'geschenklyWishlist', array(
             'restUrl' => esc_url_raw(rest_url('geschenkly/v1/wishlist')),
@@ -583,35 +583,32 @@ function geschenkly_display_product_card() {
             </div>
             <div class="analytics-section">
                 <p class="section-title">📊 Geschenkly Einblicke</p>
-                <div class="analytics-grid">
-                    <div class="analytics-item">
-                        <p class="metric-label">Beliebtheit dieser Woche</p>
-                        <div class="analytics-value" id="popularityValue">Wird geladen...</div>
-                        <div class="trend" id="popularityTrend">Trend wird berechnet...</div>
-                        <button class="trend-button" onclick="showTrendChart()">TREND ANZEIGEN</button>
+                <div class="kpi-row">
+                    <div class="kpi">
+                        <span class="kpi-label">🏆 Beliebtheit</span>
+                        <span class="kpi-value" id="popularityValue">…</span>
+                        <span class="kpi-rank" id="popularityRank"></span>
+                        <span class="trend" id="popularityTrend"></span>
+                        <button class="trend-button" onclick="showTrendChart()">Trend anzeigen</button>
                     </div>
-                    <div class="analytics-item">
-                        <p class="metric-label">Kaufwunsch letzte 30 Tage</p>
-                        <div class="analytics-value" id="monthlyClicks">Wird geladen...</div>
-                        <div class="trend" id="clicksTrend">Trend wird berechnet...</div>
+                    <div class="kpi">
+                        <span class="kpi-label">🛒 Kaufwunsch · 30 Tage</span>
+                        <span class="kpi-value" id="monthlyClicks">…</span>
+                        <span class="trend" id="clicksTrend"></span>
                     </div>
-                </div>
-                <div id="trendChartContainer" style="display: none;">
-                    <canvas id="trendChart"></canvas>
-                </div>
-                <div class="interest-section">
-                    <p class="section-title">🔥 Aktuelles Interesse anderer Nutzer</p>
-                    <div class="interest-visualization">
+                    <div class="kpi kpi-interest">
+                        <span class="kpi-label">🔥 Aktuelles Interesse</span>
                         <div class="interest-bar">
                             <div class="interest-level" id="interestLevel"></div>
                         </div>
                         <div class="interest-labels">
-                            <span>Ruhiges Interesse</span>
-                            <span>steigt gerade an</span>
-                            <span>sehr beliebt</span>
+                            <span>ruhig</span><span>steigt</span><span>sehr beliebt</span>
                         </div>
+                        <span class="interest-description" id="interestDescription"></span>
                     </div>
-                    <p class="interest-description" id="interestDescription"></p>
+                </div>
+                <div id="trendChartContainer" style="display: none;">
+                    <canvas id="trendChart"></canvas>
                 </div>
                 <?php if (!empty($product_categories) && !is_wp_error($product_categories)): ?>
                 <div class="gift-categories">
