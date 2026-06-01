@@ -20,6 +20,41 @@
     --gk-radius: 16px;
     --gk-shadow: 0 1px 2px rgba(36, 28, 15, .05);
     --gk-shadow-hover: 0 14px 30px rgba(36, 28, 15, .14);
+    --gk-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* --------------------------------------------------------------------- */
+/* Saubere, einheitliche Typografie fuer alle Archiv-Komponenten          */
+/* --------------------------------------------------------------------- */
+
+.woocommerce .term-description,
+.woocommerce ul.products li.product,
+.woocommerce ul.products li.product-category,
+.bapf_sfilter,
+.berocket_ajax_group_filter_title,
+.sidebar.sidebar-left,
+.gky-active-filters,
+.gky-ratgeber {
+    font-family: var(--gk-font);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* --------------------------------------------------------------------- */
+/* Layout-Bereinigung: leere Platzhalter/Luecken im Kopfbereich entfernen */
+/* --------------------------------------------------------------------- */
+
+.woocommerce-products-header:empty,
+.woocommerce .term-header-image:empty,
+.woocommerce .term-description p:empty,
+.woocommerce .term-description > br:first-child,
+.woocommerce .term-description br + br {
+    display: none !important;
+}
+
+.woocommerce-products-header {
+    margin-bottom: 0;
 }
 
 /* --------------------------------------------------------------------- */
@@ -830,4 +865,118 @@ a.bapf_clear_all {
     line-height: 1.2;
     letter-spacing: -0.01em;
     margin: 0 0 .55em;
+}
+
+/* --------------------------------------------------------------------- */
+/* Aktive-Filter-Leiste + Treffer-Zaehler ueber dem Produktgrid           */
+/* --------------------------------------------------------------------- */
+
+.gky-active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    padding: 11px 14px;
+    background: var(--gk-panel-soft);
+    border: 1px solid var(--gk-line);
+    border-radius: 12px;
+}
+.gky-result-count {
+    font-weight: 800;
+    color: var(--gk-ink);
+    font-size: 1rem;
+    white-space: nowrap;
+}
+.gky-result-count b {
+    color: var(--gk-gold-dark);
+}
+.gky-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.gky-chips:empty {
+    display: none;
+}
+.gky-active-filters .gky-divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--gk-line);
+    margin: -2px 2px;
+}
+.gky-active-filters .gky-divider:last-of-type {
+    display: none;
+}
+.gky-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 9px 6px 13px;
+    border: 1px solid var(--gk-gold-border);
+    border-radius: 999px;
+    background: var(--gk-gold-soft);
+    color: var(--gk-gold-dark);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.gky-chip:hover {
+    background: var(--gk-gold);
+    border-color: var(--gk-gold);
+    color: #fff;
+}
+.gky-chip .gky-chip-grp {
+    opacity: .65;
+    font-weight: 600;
+}
+.gky-chip .gky-chip-x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(36, 28, 15, .1);
+    font-size: 13px;
+    line-height: 1;
+}
+.gky-chip:hover .gky-chip-x {
+    background: rgba(255, 255, 255, .35);
+}
+.gky-chip-clear {
+    margin-left: auto;
+    border: 0;
+    background: none;
+    padding: 4px 2px;
+    cursor: pointer;
+    color: var(--gk-muted);
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: underline;
+    font-family: var(--gk-font);
+}
+.gky-chip-clear:hover {
+    color: var(--gk-down);
+}
+.gky-chip-clear:empty,
+.gky-chip-clear[hidden] {
+    display: none;
+}
+
+@media (max-width: 599px) {
+    .gky-active-filters {
+        padding: 10px 12px;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .gky-result-count {
+        font-size: .95rem;
+        width: 100%;
+    }
+    .gky-chip-clear {
+        margin-left: 0;
+    }
 }

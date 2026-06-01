@@ -241,25 +241,44 @@ class Geschenkly_Analytics_Plugin {
 			return;
 		}
 
-		$path = plugin_dir_path( __FILE__ ) . 'assets/css/archive.css';
+		// Dateinamen bewusst versioniert (…-v2): manche Full-Page-/CDN-Caches
+		// ignorieren den ?ver-Parameter und liefern sonst veraltetes CSS aus.
+		$path = plugin_dir_path( __FILE__ ) . 'assets/css/geschenkly-archive.css';
 		$ver  = file_exists( $path ) ? filemtime( $path ) : GESCHENKLY_ANALYTICS_VERSION;
 		wp_enqueue_style(
 			'geschenkly-archive',
-			plugin_dir_url( __FILE__ ) . 'assets/css/archive.css',
+			plugin_dir_url( __FILE__ ) . 'assets/css/geschenkly-archive.css',
 			array(),
 			$ver
 		);
 
-		// Verschiebt die Ratgeber-Verweise in ein einklappbares "Passende
-		// Ratgeber"-Akkordeon (befreit den Kopfbereich, SEO-Links bleiben).
-		$js_path = plugin_dir_path( __FILE__ ) . 'assets/js/archive.js';
+		// Ratgeber-Akkordeon + aktive-Filter-Chips/Treffer-Zaehler.
+		$js_path = plugin_dir_path( __FILE__ ) . 'assets/js/geschenkly-archive.js';
 		$js_ver  = file_exists( $js_path ) ? filemtime( $js_path ) : GESCHENKLY_ANALYTICS_VERSION;
 		wp_enqueue_script(
 			'geschenkly-archive',
-			plugin_dir_url( __FILE__ ) . 'assets/js/archive.js',
+			plugin_dir_url( __FILE__ ) . 'assets/js/geschenkly-archive.js',
 			array(),
 			$js_ver,
 			true
+		);
+
+		// Kategorie-Gesamtzahl fuer den Treffer-Zaehler bereitstellen.
+		$total = 0;
+		$obj   = get_queried_object();
+		if ( $obj && isset( $obj->count ) ) {
+			$total = (int) $obj->count;
+		}
+		wp_localize_script(
+			'geschenkly-archive',
+			'geschenklyArchive',
+			array(
+				'total'      => $total,
+				'labelOne'   => __( 'Geschenk', 'geschenkly' ),
+				'labelMany'  => __( 'Geschenke', 'geschenkly' ),
+				'ratgeber'   => __( 'Passende Ratgeber', 'geschenkly' ),
+				'resetLabel' => __( 'Alle Filter zurücksetzen', 'geschenkly' ),
+			)
 		);
 	}
 
