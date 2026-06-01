@@ -192,6 +192,8 @@ jQuery(document).ready(function($) {
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -263,6 +265,7 @@ function showTrendChart() {
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         x: { beginAtZero: true },
                         y: { beginAtZero: true, max: 5 }

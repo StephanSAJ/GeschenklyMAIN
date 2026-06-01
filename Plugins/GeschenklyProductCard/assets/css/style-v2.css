@@ -233,9 +233,9 @@ body {
 /* --- Eigenschaften-Grid ------------------------------------------------ */
 .gift-summary {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-bottom: 26px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
 .summary-item,
@@ -243,8 +243,8 @@ body {
     background: var(--gk-panel);
     border: 1px solid var(--gk-line);
     border-radius: var(--gk-radius-sm);
-    padding: 16px;
-    text-align: center;
+    padding: 12px 14px;
+    text-align: left;
     box-shadow: var(--gk-shadow-sm);
     height: 100%;
     display: flex;
@@ -261,11 +261,12 @@ body {
 .summary-item-full { grid-column: 1 / -1; }
 
 .summary-icon {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 0.02em;
-    color: var(--gk-ink);
-    margin-bottom: 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--gk-muted);
+    margin-bottom: 8px;
 }
 
 .summary-item h3,
@@ -274,24 +275,24 @@ body {
     font-size: 16px;
     color: #666;
 }
-.summary-item p { margin: 0; font-size: 14px; color: var(--gk-text); }
+.summary-item p { margin: 0; font-size: 13px; line-height: 1.4; color: var(--gk-text); }
 
 /* --- Tags / Chips ------------------------------------------------------ */
 .attributes-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 10px;
+    gap: 6px;
+    justify-content: flex-start;
+    margin-top: 8px;
 }
 
 .tag {
     background: var(--gk-gold-soft);
     color: var(--gk-gold-dark);
     border: 1px solid var(--gk-gold-border);
-    padding: 5px 12px;
+    padding: 4px 10px;
     border-radius: var(--gk-radius-pill);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
@@ -306,17 +307,16 @@ body {
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    flex-grow: 1;
+    gap: 6px;
+    justify-content: flex-start;
 }
 .tag-list li {
     background: var(--gk-gold-soft);
     color: var(--gk-gold-dark);
     border: 1px solid var(--gk-gold-border);
-    padding: 5px 12px;
+    padding: 4px 10px;
     border-radius: var(--gk-radius-pill);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
 }
 .kurz-gesagt-list li { background: #e8f5ec; color: #2e8b57; border-color: #bfe3cc; }
@@ -345,15 +345,25 @@ body {
     background: var(--gk-gold-soft);
     border: 1px solid var(--gk-gold-border);
     border-radius: var(--gk-radius);
-    padding: 22px;
+    padding: 16px;
 }
 
-#categoryChartContainer { margin-top: 12px; }
+/* Charts kompakt + feste Hoehe (Chart.js fuellt den Container, s. maintainAspectRatio:false) */
+#categoryChartContainer,
+#trendChartContainer {
+    position: relative;
+    height: 190px;
+    margin-top: 8px;
+}
+#categoryChartContainer canvas,
+#trendChartContainer canvas {
+    max-height: 190px !important;
+}
 
 .analytics-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 12px;
 }
 .analytics-section .analytics-item { background: var(--gk-panel); }
 
@@ -391,10 +401,10 @@ body {
 }
 .trend-button:hover { color: var(--gk-gold); }
 
-#trendChartContainer { margin-top: 16px; background: #fff; border-radius: var(--gk-radius-sm); padding: 10px; }
+#trendChartContainer { margin-top: 12px; background: #fff; border-radius: var(--gk-radius-sm); padding: 10px 10px 0; }
 
 /* Interesse-Balken */
-.interest-section { margin-top: 22px; }
+.interest-section { margin-top: 16px; }
 .interest-visualization { margin-top: 14px; }
 .interest-bar {
     width: 100%;
@@ -509,11 +519,12 @@ body {
     .gift-image-description { flex-direction: column; }
     .gift-image { margin: 0 0 16px; flex: 0 0 auto; align-self: center; max-width: 320px; }
     .gift-short-description { padding: 0; }
-    .gift-summary { grid-template-columns: 1fr; }
+    .gift-summary { grid-template-columns: repeat(2, 1fr); }
     #shopButton { width: 92%; min-width: 0; font-size: 19px; }
 }
 
 @media screen and (max-width: 480px) {
+    .gift-summary { grid-template-columns: 1fr; }
     .analytics-grid { grid-template-columns: 1fr; }
     .gift-header { padding: 22px 16px 20px; }
 }
