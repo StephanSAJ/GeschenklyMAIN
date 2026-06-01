@@ -193,6 +193,14 @@
     display: flex;
 }
 
+/* Leere/Platzhalter-Listenpunkte belegen sonst die erste Grid-Zelle
+   (sichtbar als leerer erster Produktplatz). Sauber ausblenden. */
+.woocommerce ul.products > li:empty,
+.woocommerce ul.products > li.product:not(:has(.product-wrapper)),
+.woocommerce ul.products > li.first:empty {
+    display: none !important;
+}
+
 /* Karte */
 .woocommerce ul.products li.product .product-wrapper {
     display: flex;
@@ -816,6 +824,7 @@ a.bapf_clear_all {
 /* Kompaktes Akkordeon: Ausloeser ist ein kleiner Pill (Icon + Text), KEIN
    Vollbreit-Kasten. Im geoeffneten Zustand erscheinen die Karten darunter. */
 .woocommerce .term-description details.gky-ratgeber {
+    position: relative;
     margin: 16px 0 4px;
     border: 0;
     background: none;
@@ -862,15 +871,51 @@ a.bapf_clear_all {
 .woocommerce .term-description details.gky-ratgeber[open] summary::after {
     transform: rotate(90deg);
 }
+/* Geoeffnet: sauberes Popover-Overlay (schiebt das Layout NICHT). */
 .woocommerce .term-description details.gky-ratgeber .gky-ratgeber-list {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + 8px);
+    left: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 12px 0 4px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 8px;
+    min-width: 300px;
+    max-width: 380px;
+    padding: 10px;
+    background: var(--gk-panel);
+    border: 1px solid var(--gk-line);
+    border-radius: 14px;
+    box-shadow: var(--gk-shadow-hover);
+}
+/* kleiner Zeiger zum Auslöser */
+.woocommerce .term-description details.gky-ratgeber[open] .gky-ratgeber-list::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 22px;
+    width: 11px;
+    height: 11px;
+    background: var(--gk-panel);
+    border-left: 1px solid var(--gk-line);
+    border-top: 1px solid var(--gk-line);
+    transform: rotate(45deg);
 }
 .woocommerce .term-description .gky-ratgeber-list a:has(img) {
     margin: 0;
-    background: var(--gk-panel);
+    width: 100%;
+    max-width: none;
+    background: var(--gk-panel-soft);
+}
+
+/* Popover auf schmalen Screens nicht ueber den Rand laufen lassen */
+@media (max-width: 599px) {
+    .woocommerce .term-description details.gky-ratgeber .gky-ratgeber-list {
+        min-width: 0;
+        width: 88vw;
+        max-width: 88vw;
+    }
 }
 
 /* Kopfbereich: Section-Ueberschrift "Geschenke für jeden Anlass!" */

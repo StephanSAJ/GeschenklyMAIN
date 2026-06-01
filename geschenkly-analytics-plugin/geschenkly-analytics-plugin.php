@@ -243,11 +243,11 @@ class Geschenkly_Analytics_Plugin {
 
 		// Dateinamen bewusst versioniert (…-v2): manche Full-Page-/CDN-Caches
 		// ignorieren den ?ver-Parameter und liefern sonst veraltetes CSS aus.
-		$path = plugin_dir_path( __FILE__ ) . 'assets/css/geschenkly-archive-v2.css';
+		$path = plugin_dir_path( __FILE__ ) . 'assets/css/geschenkly-archive-v3.css';
 		$ver  = file_exists( $path ) ? filemtime( $path ) : GESCHENKLY_ANALYTICS_VERSION;
 		wp_enqueue_style(
 			'geschenkly-archive',
-			plugin_dir_url( __FILE__ ) . 'assets/css/geschenkly-archive-v2.css',
+			plugin_dir_url( __FILE__ ) . 'assets/css/geschenkly-archive-v3.css',
 			array(),
 			$ver
 		);
