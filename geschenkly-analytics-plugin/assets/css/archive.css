@@ -593,16 +593,31 @@
 }
 
 /* --------------------------------------------------------------------- */
-/* Filter-Sidebar (BeRocket) – modernes, markentreues Styling             */
+/* Filter-Sidebar (BeRocket) – Pill-Toggles + Karte (markentreu)          */
 /* --------------------------------------------------------------------- */
 /* Loest den 2012-Look ab: native Checkboxen + Trennlinien unter jeder    */
-/* Zeile + blasse Typografie. Wir entfernen die Linien, faerben die       */
-/* Checkbox golden, machen Zeilen tippbar und die Gruppentitel klarer.    */
+/* Zeile. Stattdessen: Filter als Karte, Optionen als anklickbare Pills,  */
+/* aktive Auswahl golden, Budget-Slider im Markendesign.                  */
 
-/* Widget-Titel ("Für wen suchst du ein Geschenk?") */
+/* Die Filter-Sidebar als markentreue Karte (nur Desktop – auf Mobil      */
+/* nutzt BeRocket einen Off-Canvas-Drawer, den wir nicht anfassen).       */
+@media (min-width: 769px) {
+    .woocommerce .sidebar.sidebar-left,
+    .sidebar.sidebar-left[role="secondary"] {
+        background: var(--gk-panel);
+        border: 1px solid var(--gk-line);
+        border-radius: var(--gk-radius);
+        padding: 18px 18px 10px;
+        box-shadow: var(--gk-shadow);
+    }
+}
+
+/* Filter-Haupttitel ("Für wen suchst du ein Geschenk?") + Widget-Titel */
+.berocket_ajax_group_filter_title,
 .woocommerce .widget .widgettitle,
 .sidebar .widget .widgettitle,
 .widget .widgettitle {
+    margin: 0 0 6px;
     color: var(--gk-ink);
     font-weight: 800;
     font-size: 1.18rem;
@@ -610,7 +625,7 @@
     line-height: 1.25;
 }
 
-/* Gruppentitel: Geschlecht / Alter / Geschenk-Typ */
+/* Gruppentitel: Geschlecht / Alter / Geschenk-Typ / Beziehung / Budget */
 .bapf_head p {
     font-size: 12px !important;
     font-weight: 800 !important;
@@ -618,50 +633,111 @@
     letter-spacing: .07em;
     color: var(--gk-muted) !important;
     padding-top: 16px !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 10px !important;
 }
 
-/* Optische Trennung zwischen den Filtergruppen (statt Zeilen-Unterstriche) */
+/* Trennung zwischen den Filtergruppen (statt Zeilen-Unterstriche) */
 .bapf_sfilter {
     border-top: 1px solid var(--gk-line);
     padding-top: 2px;
-    margin-bottom: 8px !important;
+    margin-bottom: 10px !important;
 }
 
-/* Zeilen: keine Trennlinien mehr, sauberes Raster */
-.bapf_sfilter ul li {
+/* Optionsliste als Pill-Wolke (Float/Unterstriche des Themes ueberschreiben) */
+.bapf_sfilter .bapf_body > ul,
+.bapf_sfilter .bapf_body .mCSB_container > ul {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none;
+}
+.bapf_sfilter .bapf_body ul li {
+    float: none !important;
+    width: auto !important;
     border-bottom: 0 !important;
     list-style: none !important;
     margin: 0 !important;
-    padding: 1px 0 !important;
+    padding: 0 !important;
 }
 
-/* Label als tippbare, abgerundete Zeile */
-.bapf_sfilter.bapf_ckbox label {
-    display: inline-flex !important;
-    align-items: center;
-    margin: 1px 0 !important;
-    padding: 6px 8px !important;
-    border-radius: 10px;
-    color: var(--gk-text);
-    font-size: 15px !important;
-    line-height: 1.25;
-    transition: background .12s ease, color .12s ease;
-}
-.bapf_sfilter.bapf_ckbox label:hover,
-.bapf_sfilter.bapf_ckbox label:focus-within {
-    background: var(--gk-gold-soft);
-    color: var(--gk-ink);
-}
-
-/* Checkbox in Markenfarbe, etwas groesser, sauber ausgerichtet */
+/* Native Checkbox unsichtbar, aber bedienbar/zugaenglich (kein display:none) */
 .bapf_sfilter.bapf_ckbox input[type=checkbox] {
-    width: 17px;
-    height: 17px;
-    accent-color: var(--gk-gold);
+    position: absolute !important;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0 !important;
+    pointer-events: none;
+}
+
+/* Label als Pill */
+.bapf_sfilter.bapf_ckbox label {
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 7px 14px !important;
+    border: 1px solid var(--gk-line);
+    border-radius: 999px;
+    background: var(--gk-panel);
+    color: var(--gk-text);
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.25;
     cursor: pointer;
-    vertical-align: middle;
-    margin-right: 2px;
+    user-select: none;
+    transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.bapf_sfilter.bapf_ckbox label:hover {
+    border-color: var(--gk-gold-border);
+    background: var(--gk-gold-soft);
+    color: var(--gk-gold-dark);
+}
+
+/* Aktive Auswahl: goldene Pill */
+.bapf_sfilter.bapf_ckbox input[type=checkbox]:checked + label {
+    background: linear-gradient(135deg, #f4b73d 0%, var(--gk-gold) 60%, var(--gk-gold-dark) 100%);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(233, 164, 0, .3);
+}
+.bapf_sfilter.bapf_ckbox input[type=checkbox]:focus-visible + label {
+    outline: 3px solid rgba(233, 164, 0, .45);
+    outline-offset: 2px;
+}
+
+/* Budget: jQuery-UI-Slider im Markendesign */
+.bapf_slidr .bapf_slidr_main.ui-slider {
+    height: 6px;
+    border: 0;
+    background: var(--gk-line);
+    border-radius: 999px;
+    margin: 16px 8px 12px;
+}
+.bapf_slidr .ui-slider-range {
+    background: linear-gradient(90deg, var(--gk-gold) 0%, var(--gk-gold-dark) 100%);
+    border: 0;
+}
+.bapf_slidr .ui-slider-handle {
+    width: 18px;
+    height: 18px;
+    top: -7px;
+    margin-left: -9px;
+    border: 2px solid var(--gk-gold);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(36, 28, 15, .2);
+    cursor: grab;
+}
+.bapf_slidr .ui-slider-handle:focus {
+    outline: 3px solid rgba(233, 164, 0, .45);
+    outline-offset: 1px;
+}
+.bapf_slidr .bapf_from,
+.bapf_slidr .bapf_to {
+    color: var(--gk-ink);
+    font-weight: 700;
+    font-size: 14px;
 }
 
 /* "Filter zuruecksetzen"/Buttons des Plugins markentreu */
@@ -671,6 +747,80 @@
 a.bapf_clear_all {
     border-radius: 10px !important;
     font-weight: 700 !important;
+}
+
+/* SEO-Text-Widget unten in der Sidebar dezent abtrennen */
+.sidebar .widget_text.enhanced-text-widget {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--gk-line);
+    font-size: .9rem;
+    line-height: 1.6;
+    color: var(--gk-text);
+}
+.sidebar .side-styling h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--gk-ink);
+    margin: 0 0 .5em;
+}
+.sidebar .side-styling h3 {
+    font-size: .98rem;
+    font-weight: 800;
+    color: var(--gk-ink);
+    margin: 1em 0 .4em;
+}
+.sidebar .side-styling a {
+    color: var(--gk-gold-dark);
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------- */
+/* Ratgeber-Akkordeon (per archive.js aus .term-description befuellt)      */
+/* --------------------------------------------------------------------- */
+
+.woocommerce .term-description details.gky-ratgeber {
+    margin: 20px 0 4px;
+    border: 1px solid var(--gk-line);
+    border-radius: 12px;
+    background: var(--gk-panel-soft);
+    overflow: hidden;
+}
+.woocommerce .term-description details.gky-ratgeber summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 16px;
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--gk-ink);
+    list-style: none;
+}
+.woocommerce .term-description details.gky-ratgeber summary::-webkit-details-marker {
+    display: none;
+}
+.woocommerce .term-description details.gky-ratgeber summary::before {
+    content: "📚";
+    font-size: 1.05em;
+}
+.woocommerce .term-description details.gky-ratgeber summary::after {
+    content: "▸";
+    margin-left: auto;
+    color: var(--gk-muted);
+    transition: transform .2s ease;
+}
+.woocommerce .term-description details.gky-ratgeber[open] summary::after {
+    transform: rotate(90deg);
+}
+.woocommerce .term-description details.gky-ratgeber .gky-ratgeber-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 2px 16px 16px;
+}
+.woocommerce .term-description .gky-ratgeber-list a:has(img) {
+    margin: 0;
+    background: var(--gk-panel);
 }
 
 /* Kopfbereich: Section-Ueberschrift "Geschenke für jeden Anlass!" */

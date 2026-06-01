@@ -249,6 +249,18 @@ class Geschenkly_Analytics_Plugin {
 			array(),
 			$ver
 		);
+
+		// Verschiebt die Ratgeber-Verweise in ein einklappbares "Passende
+		// Ratgeber"-Akkordeon (befreit den Kopfbereich, SEO-Links bleiben).
+		$js_path = plugin_dir_path( __FILE__ ) . 'assets/js/archive.js';
+		$js_ver  = file_exists( $js_path ) ? filemtime( $js_path ) : GESCHENKLY_ANALYTICS_VERSION;
+		wp_enqueue_script(
+			'geschenkly-archive',
+			plugin_dir_url( __FILE__ ) . 'assets/js/archive.js',
+			array(),
+			$js_ver,
+			true
+		);
 	}
 
 	/**
