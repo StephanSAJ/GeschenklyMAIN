@@ -114,9 +114,21 @@ class Geschenkly_Analytics_Plugin {
 			update_option( 'geschenkly_pop_seeded', 1 );
 		}
 
-		// Zeitgewichteter Klick-Score je Produkt (letzte 30 Tage, juengere Klicks staerker).
+		// Hybrid-Ranking: Damit inaktive Produkte nicht mit eingefrorenen Klick-
+		// Scores dauerhaft "Top" blockieren, wird JEDEN Rollup zuerst alles auf den
+		// ruhigen Basiswert zurueckgesetzt (_homepage_rating, sonst 0) und danach
+		// fuer aktive Produkte mit dem aktuellen 30-Tage-Klick-Score ueberschrieben.
 		$table = self::table_name();
-		$rows  = $wpdb->get_results(
+		$wpdb->query(
+			"UPDATE {$wpdb->postmeta} ps
+			 LEFT JOIN {$wpdb->postmeta} hr
+			   ON hr.post_id = ps.post_id AND hr.meta_key = '_homepage_rating'
+			 SET ps.meta_value = COALESCE( hr.meta_value, 0 )
+			 WHERE ps.meta_key = '_geschenkly_pop_score'"
+		);
+
+		// Zeitgewichteter Klick-Score je Produkt (letzte 30 Tage, juengere Klicks staerker).
+		$rows = $wpdb->get_results(
 			"SELECT product_id,
 			        SUM(CASE WHEN created_at >= (UTC_TIMESTAMP() - INTERVAL 7 DAY) THEN 3 ELSE 1 END) AS score
 			 FROM {$table}
@@ -278,6 +290,12 @@ class Geschenkly_Analytics_Plugin {
 	public function maybe_upgrade_db() {
 		if ( get_option( 'geschenkly_analytics_db_version' ) !== GESCHENKLY_ANALYTICS_DB_VERSION ) {
 			self::install();
+		}
+
+		// Cron selbstheilend sicherstellen: falls das stuendliche Rollup-Event
+		// je verloren geht, hier neu einplanen (sonst aktualisiert sich "Top" nie).
+		if ( ! wp_next_scheduled( 'geschenkly_rollup_popularity' ) ) {
+			wp_schedule_event( time() + 300, 'hourly', 'geschenkly_rollup_popularity' );
 		}
 	}
 
