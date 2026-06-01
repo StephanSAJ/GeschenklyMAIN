@@ -53,9 +53,30 @@
         desc.appendChild(details);
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', buildRatgeberAccordion);
-    } else {
+    // Popover schliessen bei Klick ausserhalb oder Escape.
+    function bindCloseHandlers() {
+        document.addEventListener('click', function (e) {
+            var open = document.querySelector('details.gky-ratgeber[open]');
+            if (open && !open.contains(e.target)) {
+                open.removeAttribute('open');
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                var open = document.querySelector('details.gky-ratgeber[open]');
+                if (open) { open.removeAttribute('open'); }
+            }
+        });
+    }
+
+    function init() {
         buildRatgeberAccordion();
+        bindCloseHandlers();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
     }
 })();

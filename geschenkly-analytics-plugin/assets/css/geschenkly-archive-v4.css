@@ -165,6 +165,17 @@
     list-style: none;
 }
 
+/* WICHTIG: ul.products traegt die Klasse "clearfix". Deren ::before/::after
+   (content:"") werden im Grid zu echten Grid-Items und belegen die erste
+   Zelle => leerer erster Produktplatz. Pseudoelemente daher entfernen. */
+.woocommerce ul.products::before,
+.woocommerce ul.products::after,
+.woocommerce-page ul.products::before,
+.woocommerce-page ul.products::after {
+    content: none !important;
+    display: none !important;
+}
+
 @media (min-width: 600px) {
     .woocommerce ul.products,
     .woocommerce-page ul.products {

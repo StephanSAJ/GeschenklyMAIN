@@ -243,21 +243,21 @@ class Geschenkly_Analytics_Plugin {
 
 		// Dateinamen bewusst versioniert (…-v2): manche Full-Page-/CDN-Caches
 		// ignorieren den ?ver-Parameter und liefern sonst veraltetes CSS aus.
-		$path = plugin_dir_path( __FILE__ ) . 'assets/css/geschenkly-archive-v3.css';
+		$path = plugin_dir_path( __FILE__ ) . 'assets/css/geschenkly-archive-v4.css';
 		$ver  = file_exists( $path ) ? filemtime( $path ) : GESCHENKLY_ANALYTICS_VERSION;
 		wp_enqueue_style(
 			'geschenkly-archive',
-			plugin_dir_url( __FILE__ ) . 'assets/css/geschenkly-archive-v3.css',
+			plugin_dir_url( __FILE__ ) . 'assets/css/geschenkly-archive-v4.css',
 			array(),
 			$ver
 		);
 
 		// Ratgeber-Akkordeon + aktive-Filter-Chips/Treffer-Zaehler.
-		$js_path = plugin_dir_path( __FILE__ ) . 'assets/js/geschenkly-archive-v2.js';
+		$js_path = plugin_dir_path( __FILE__ ) . 'assets/js/geschenkly-archive-v4.js';
 		$js_ver  = file_exists( $js_path ) ? filemtime( $js_path ) : GESCHENKLY_ANALYTICS_VERSION;
 		wp_enqueue_script(
 			'geschenkly-archive',
-			plugin_dir_url( __FILE__ ) . 'assets/js/geschenkly-archive-v2.js',
+			plugin_dir_url( __FILE__ ) . 'assets/js/geschenkly-archive-v4.js',
 			array(),
 			$js_ver,
 			true
