@@ -335,6 +335,47 @@
 }
 
 /* --------------------------------------------------------------------- */
+/* Theme-"Zoom"-Layout neutralisieren -> CTA immer sichtbar (Konversion)  */
+/* --------------------------------------------------------------------- */
+/* Standardmaessig versteckt das Theme den Button (visibility:hidden,     */
+/* height:0, position:absolute) und zeigt ihn erst beim Hover an einer    */
+/* unguenstigen Stelle (Karte springt auf 130%). Auf Touch/Mobil gibt es  */
+/* keinen Hover -> der CTA ist unsichtbar. Wir halten den Button dauerhaft */
+/* sichtbar, im Fluss und unten in der Karte.                              */
+
+.woocommerce ul.products li.product.grid .product-wrapper.zoom,
+.woocommerce ul.products li.product .product-wrapper.zoom,
+.woocommerce ul.products li.product.grid:hover .product-wrapper.zoom,
+.woocommerce ul.products li.product:hover .product-wrapper.zoom {
+    width: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    z-index: auto !important;
+}
+
+.woocommerce ul.products li.product .product-wrapper.zoom .product-actions-wrapper {
+    position: static !important;
+    visibility: visible !important;
+    height: auto !important;
+    min-width: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    overflow: visible !important;
+}
+
+.woocommerce ul.products li.product .product-wrapper.zoom .product-actions {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: left;
+}
+
+/* --------------------------------------------------------------------- */
 /* Unterkategorie-Kacheln (falls eine Kategorie Unterkategorien zeigt)    */
 /* --------------------------------------------------------------------- */
 
