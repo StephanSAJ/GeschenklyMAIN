@@ -1,26 +1,15 @@
 /**
  * Geschenkly – Archiv-/Kategorie-Seite
  *
- * 1) Verschiebt die Ratgeber-Verweise (Bild-Links der Kategorie-Beschreibung)
- *    in ein natives, einklappbares <details>-Akkordeon "Passende Ratgeber".
- * 2) Zeigt ueber dem Produktgrid einen Treffer-Zaehler und die aktiven Filter
- *    als entfernbare Chips (arbeitet mit dem BeRocket-Filter zusammen).
+ * Verschiebt die Ratgeber-Verweise (Bild-Links der Kategorie-Beschreibung)
+ * in ein kompaktes, einklappbares <details>-Akkordeon "Passende Ratgeber".
+ * Die Links bleiben so fuer SEO im HTML, dominieren aber den Kopf nicht mehr.
  */
 (function () {
     'use strict';
 
     var CFG = window.geschenklyArchive || {};
-    var L = {
-        one: CFG.labelOne || 'Geschenk',
-        many: CFG.labelMany || 'Geschenke',
-        ratgeber: CFG.ratgeber || 'Passende Ratgeber',
-        reset: CFG.resetLabel || 'Alle Filter zurücksetzen',
-        total: parseInt(CFG.total, 10) || 0
-    };
-
-    /* ----------------------------------------------------------------- */
-    /* 1) Ratgeber-Akkordeon                                             */
-    /* ----------------------------------------------------------------- */
+    var RATGEBER = CFG.ratgeber || 'Passende Ratgeber';
 
     function buildRatgeberAccordion() {
         var desc = document.querySelector('.term-description');
@@ -28,6 +17,8 @@
             return;
         }
 
+        // Ratgeber-Verweise = Links, die ein Bild enthalten (reine Textlinks
+        // im Beschreibungstext bleiben unangetastet).
         var links = Array.prototype.filter.call(
             desc.querySelectorAll('a'),
             function (a) { return a.querySelector('img'); }
@@ -40,7 +31,7 @@
         details.className = 'gky-ratgeber';
 
         var summary = document.createElement('summary');
-        summary.textContent = L.ratgeber;
+        summary.textContent = RATGEBER;
         details.appendChild(summary);
 
         var list = document.createElement('div');
@@ -62,145 +53,9 @@
         desc.appendChild(details);
     }
 
-    /* ----------------------------------------------------------------- */
-    /* 2) Treffer-Zaehler + aktive Filter als Chips                      */
-    /* ----------------------------------------------------------------- */
-
-    var bar, chipsEl, clearBtn;
-
-    function checkedBoxes() {
-        return Array.prototype.slice.call(
-            document.querySelectorAll('.bapf_sfilter.bapf_ckbox input[type="checkbox"]:checked')
-        );
-    }
-
-    function productsList() {
-        return document.querySelector('ul.products');
-    }
-
-    function labelFor(input) {
-        if (input.getAttribute('data-name')) {
-            return input.getAttribute('data-name');
-        }
-        if (input.id) {
-            var lab = document.querySelector('label[for="' + input.id + '"]');
-            if (lab) { return lab.textContent.trim(); }
-        }
-        return input.value || '';
-    }
-
-    function groupFor(input) {
-        var grp = input.closest ? input.closest('.bapf_sfilter') : null;
-        return grp ? (grp.getAttribute('data-name') || '') : '';
-    }
-
-    function renderChips() {
-        if (!chipsEl) { return; }
-        var boxes = checkedBoxes();
-        chipsEl.innerHTML = '';
-
-        boxes.forEach(function (input) {
-            var chip = document.createElement('button');
-            chip.type = 'button';
-            chip.className = 'gky-chip';
-            var grp = groupFor(input);
-
-            if (grp) {
-                var g = document.createElement('span');
-                g.className = 'gky-chip-grp';
-                g.textContent = grp + ':';
-                chip.appendChild(g);
-            }
-            var name = document.createElement('span');
-            name.textContent = labelFor(input);
-            chip.appendChild(name);
-
-            var x = document.createElement('span');
-            x.className = 'gky-chip-x';
-            x.setAttribute('aria-hidden', 'true');
-            x.textContent = '×';
-            chip.appendChild(x);
-
-            chip.setAttribute('aria-label', 'Filter entfernen: ' + labelFor(input));
-            chip.addEventListener('click', function () {
-                // Echter Klick auf die Checkbox => BeRocket reagiert wie gewohnt.
-                input.click();
-            });
-
-            chipsEl.appendChild(chip);
-        });
-
-        // Die Leiste erscheint nur, wenn tatsaechlich gefiltert wird (kein
-        // redundanter Treffer-Zaehler – die Gesamtzahl steht bereits im Titel).
-        var any = boxes.length > 0;
-        if (clearBtn) { clearBtn.hidden = !any; }
-        if (bar) { bar.hidden = !any; }
-    }
-
-    function buildBar() {
-        var ul = productsList();
-        if (!ul || document.querySelector('.gky-active-filters')) {
-            return;
-        }
-
-        bar = document.createElement('div');
-        bar.className = 'gky-active-filters';
-        bar.hidden = true;
-
-        chipsEl = document.createElement('span');
-        chipsEl.className = 'gky-chips';
-        bar.appendChild(chipsEl);
-
-        clearBtn = document.createElement('button');
-        clearBtn.type = 'button';
-        clearBtn.className = 'gky-chip-clear';
-        clearBtn.textContent = L.reset;
-        clearBtn.hidden = true;
-        clearBtn.addEventListener('click', function () {
-            checkedBoxes().forEach(function (input) { input.click(); });
-        });
-        bar.appendChild(clearBtn);
-
-        ul.parentNode.insertBefore(bar, ul);
-        renderChips();
-    }
-
-    function ensureBar() {
-        // Falls BeRocket den Grid-Bereich neu aufbaut und die Leiste verliert.
-        if (!document.querySelector('.gky-active-filters')) {
-            buildBar();
-        }
-    }
-
-    function init() {
-        buildRatgeberAccordion();
-        buildBar();
-
-        // Auf jede Filteraenderung reagieren (delegiert, ueberlebt AJAX-Reloads).
-        document.addEventListener('change', function (e) {
-            if (e.target && e.target.matches &&
-                e.target.matches('.bapf_sfilter.bapf_ckbox input[type="checkbox"]')) {
-                setTimeout(renderChips, 0);
-            }
-        });
-
-        // Produktanzahl nach AJAX-Filterung neu zaehlen.
-        var main = (productsList() && productsList().parentNode) || document.body;
-        if (window.MutationObserver) {
-            var t;
-            new MutationObserver(function () {
-                clearTimeout(t);
-                t = setTimeout(function () {
-                    ensureBar();
-                    renderChips();
-                }, 120);
-            }).observe(main, { childList: true, subtree: true });
-        }
-    }
-
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', buildRatgeberAccordion);
     } else {
-        init();
+        buildRatgeberAccordion();
     }
 })();

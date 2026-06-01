@@ -263,21 +263,11 @@ class Geschenkly_Analytics_Plugin {
 			true
 		);
 
-		// Kategorie-Gesamtzahl fuer den Treffer-Zaehler bereitstellen.
-		$total = 0;
-		$obj   = get_queried_object();
-		if ( $obj && isset( $obj->count ) ) {
-			$total = (int) $obj->count;
-		}
 		wp_localize_script(
 			'geschenkly-archive',
 			'geschenklyArchive',
 			array(
-				'total'      => $total,
-				'labelOne'   => __( 'Geschenk', 'geschenkly' ),
-				'labelMany'  => __( 'Geschenke', 'geschenkly' ),
-				'ratgeber'   => __( 'Passende Ratgeber', 'geschenkly' ),
-				'resetLabel' => __( 'Alle Filter zurücksetzen', 'geschenkly' ),
+				'ratgeber' => __( 'Passende Ratgeber', 'geschenkly' ),
 			)
 		);
 	}
