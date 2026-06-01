@@ -1,0 +1,138 @@
+/**
+ * Geschenkly – Header / Hauptmenü-Auffrischung (site-weit)
+ *
+ * Macht das Hauptmenue, die Dropdowns, die Datums-Badges und das
+ * "Erlebnisgeschenke 2026"-Label frischer und markentreu (Gold/Bernstein).
+ * Reines CSS-Override des Mindig/YITH-Headers – keine Template-Aenderung.
+ * Eigene Datei => cache-sicher (frische URL) und update-sicher.
+ */
+
+:root {
+    --gkh-gold: #e9a400;
+    --gkh-gold-dark: #c2820a;
+    --gkh-gold-soft: #fff7e6;
+    --gkh-grad: linear-gradient(135deg, #f4b73d 0%, #e9a400 60%, #c2820a 100%);
+    --gkh-ink: #241c0f;
+    --gkh-line: #ece6da;
+    --gkh-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Saubere, einheitliche Menü-Typografie */
+#header .nav,
+#header .nav ul.level-1 > li > a {
+    font-family: var(--gkh-font);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Top-Level-Links: weiche, markentreue Interaktion */
+#header .nav ul.level-1 > li > a {
+    font-weight: 600;
+    transition: color .15s ease;
+}
+#header .nav ul.level-1 > li > a:hover,
+#header .nav ul.level-1 > li:hover > a,
+#header .nav ul.level-1 > li.current-menu-item > a,
+#header .nav ul.level-1 > li.current-menu-parent > a,
+#header .nav ul.level-1 > li.current_page_item > a {
+    color: var(--gkh-gold-dark) !important;
+}
+
+/* Dropdown als moderne Karte (nur Desktop – Mobil nutzt das Off-Canvas-Menü) */
+@media (min-width: 992px) {
+    #header .nav > ul > li > div.submenu {
+        width: auto;
+        min-width: 240px;
+        padding-top: 12px;
+    }
+    #header .nav > ul > li > div.submenu > ul.sub-menu {
+        margin: 0;
+        padding: 8px;
+        background: #fff;
+        border: 1px solid var(--gkh-line);
+        border-radius: 14px;
+        box-shadow: 0 18px 40px rgba(36, 28, 15, .16);
+    }
+    #header .nav > ul > li > div.submenu > ul.sub-menu > li {
+        margin: 0;
+        border: 0;
+    }
+    #header .nav > ul > li > div.submenu ul.sub-menu li a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 12px !important;
+        border-radius: 9px;
+        font-size: 14px !important;
+        font-weight: 500;
+        color: var(--gkh-ink) !important;
+        transition: background .12s ease, color .12s ease;
+    }
+    #header .nav > ul > li > div.submenu ul.sub-menu li a:hover {
+        background: var(--gkh-gold-soft) !important;
+        color: var(--gkh-gold-dark) !important;
+    }
+    /* dezenter Pfeil-Indikator */
+    #header .nav div.submenu span.sf-sub-indicator {
+        color: var(--gkh-gold-dark);
+    }
+}
+
+/* Datums-/Aktions-Badges im Menü (z. B. "14.02") als saubere Gold-Pills */
+#header .nav span.highlight,
+#header .nav span.highlight-inverse {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 9px !important;
+    border-radius: 999px !important;
+    background: var(--gkh-grad) !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: .02em;
+    line-height: 1.6;
+    vertical-align: middle;
+}
+
+/* "Erlebnisgeschenke 2026"-Label ins Markendesign integrieren */
+a.anna-support,
+a.anna-support:visited {
+    background: var(--gkh-grad) !important;
+    color: #fff !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    padding: 7px 16px !important;
+    font-weight: 800 !important;
+    letter-spacing: .02em;
+    box-shadow: 0 6px 16px rgba(233, 164, 0, .32);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+a.anna-support:hover {
+    background: var(--gkh-grad) !important;
+    color: #fff !important;
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(233, 164, 0, .4);
+}
+
+/* Suche im Header: Button markentreu, Feld sauber gerundet */
+#header .header-search input[type="submit"],
+#header .search-button,
+#header button[type="submit"].search {
+    background: var(--gkh-grad) !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    a.anna-support,
+    #header .nav ul.level-1 > li > a {
+        transition: none !important;
+    }
+    a.anna-support:hover {
+        transform: none !important;
+    }
+}

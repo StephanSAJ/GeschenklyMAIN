@@ -295,6 +295,16 @@ class Geschenkly_Analytics_Plugin {
 		wp_enqueue_script( 'rating_js', plugin_dir_url( __FILE__ ) . 'js/rating.js', array( 'jquery' ), GESCHENKLY_ANALYTICS_VERSION, true );
 		wp_enqueue_script( 'rating_new_design_js', plugin_dir_url( __FILE__ ) . 'js/ratingNewDesign.js', array( 'jquery' ), GESCHENKLY_ANALYTICS_VERSION, true );
 
+		// Site-weite Header-/Menü-Auffrischung (markentreu, cache-/update-sicher).
+		$header_path = plugin_dir_path( __FILE__ ) . 'assets/css/geschenkly-header.css';
+		$header_ver  = file_exists( $header_path ) ? filemtime( $header_path ) : GESCHENKLY_ANALYTICS_VERSION;
+		wp_enqueue_style(
+			'geschenkly-header',
+			plugin_dir_url( __FILE__ ) . 'assets/css/geschenkly-header.css',
+			array(),
+			$header_ver
+		);
+
 		$data = array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'geschenkly_event' ),

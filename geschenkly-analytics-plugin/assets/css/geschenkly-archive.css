@@ -814,22 +814,34 @@ a.bapf_clear_all {
 /* Ratgeber-Akkordeon (per archive.js aus .term-description befuellt)      */
 /* --------------------------------------------------------------------- */
 
+/* Kompaktes Akkordeon: Ausloeser ist ein kleiner Pill (Icon + Text), KEIN
+   Vollbreit-Kasten. Im geoeffneten Zustand erscheinen die Karten darunter. */
 .woocommerce .term-description details.gky-ratgeber {
-    margin: 20px 0 4px;
-    border: 1px solid var(--gk-line);
-    border-radius: 12px;
-    background: var(--gk-panel-soft);
-    overflow: hidden;
+    margin: 16px 0 4px;
+    border: 0;
+    background: none;
+    overflow: visible;
 }
 .woocommerce .term-description details.gky-ratgeber summary {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 13px 16px;
+    width: auto;
+    padding: 8px 14px;
+    background: var(--gk-panel-soft);
+    border: 1px solid var(--gk-line);
+    border-radius: 999px;
     cursor: pointer;
-    font-weight: 800;
+    font-weight: 700;
+    font-size: .95rem;
     color: var(--gk-ink);
     list-style: none;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.woocommerce .term-description details.gky-ratgeber summary:hover {
+    background: var(--gk-gold-soft);
+    border-color: var(--gk-gold-border);
+    color: var(--gk-gold-dark);
 }
 .woocommerce .term-description details.gky-ratgeber summary::-webkit-details-marker {
     display: none;
@@ -840,9 +852,13 @@ a.bapf_clear_all {
 }
 .woocommerce .term-description details.gky-ratgeber summary::after {
     content: "▸";
-    margin-left: auto;
     color: var(--gk-muted);
     transition: transform .2s ease;
+}
+.woocommerce .term-description details.gky-ratgeber[open] summary {
+    background: var(--gk-gold-soft);
+    border-color: var(--gk-gold-border);
+    color: var(--gk-gold-dark);
 }
 .woocommerce .term-description details.gky-ratgeber[open] summary::after {
     transform: rotate(90deg);
@@ -851,7 +867,7 @@ a.bapf_clear_all {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    padding: 2px 16px 16px;
+    padding: 12px 0 4px;
 }
 .woocommerce .term-description .gky-ratgeber-list a:has(img) {
     margin: 0;
@@ -868,8 +884,13 @@ a.bapf_clear_all {
 }
 
 /* --------------------------------------------------------------------- */
-/* Aktive-Filter-Leiste + Treffer-Zaehler ueber dem Produktgrid           */
+/* Aktive-Filter-Leiste (Chips) ueber dem Produktgrid                     */
 /* --------------------------------------------------------------------- */
+/* Erscheint nur bei aktiven Filtern – kein redundanter Treffer-Zaehler.  */
+
+.gky-active-filters[hidden] {
+    display: none !important;
+}
 
 .gky-active-filters {
     display: flex;

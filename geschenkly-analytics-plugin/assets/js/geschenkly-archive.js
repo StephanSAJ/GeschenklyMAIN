@@ -66,7 +66,7 @@
     /* 2) Treffer-Zaehler + aktive Filter als Chips                      */
     /* ----------------------------------------------------------------- */
 
-    var bar, countEl, chipsEl, clearBtn, dividerEl;
+    var bar, chipsEl, clearBtn;
 
     function checkedBoxes() {
         return Array.prototype.slice.call(
@@ -76,23 +76,6 @@
 
     function productsList() {
         return document.querySelector('ul.products');
-    }
-
-    function pluralize(n) {
-        return n === 1 ? L.one : L.many;
-    }
-
-    function updateCount() {
-        if (!countEl) { return; }
-        var active = checkedBoxes().length > 0;
-        var n;
-        if (active) {
-            var ul = productsList();
-            n = ul ? ul.querySelectorAll('li.product').length : 0;
-        } else {
-            n = L.total;
-        }
-        countEl.innerHTML = '<b>' + n + '</b> ' + pluralize(n);
     }
 
     function labelFor(input) {
@@ -147,10 +130,11 @@
             chipsEl.appendChild(chip);
         });
 
+        // Die Leiste erscheint nur, wenn tatsaechlich gefiltert wird (kein
+        // redundanter Treffer-Zaehler – die Gesamtzahl steht bereits im Titel).
         var any = boxes.length > 0;
         if (clearBtn) { clearBtn.hidden = !any; }
-        if (dividerEl) { dividerEl.style.display = any ? '' : 'none'; }
-        updateCount();
+        if (bar) { bar.hidden = !any; }
     }
 
     function buildBar() {
@@ -161,14 +145,7 @@
 
         bar = document.createElement('div');
         bar.className = 'gky-active-filters';
-
-        countEl = document.createElement('span');
-        countEl.className = 'gky-result-count';
-        bar.appendChild(countEl);
-
-        dividerEl = document.createElement('span');
-        dividerEl.className = 'gky-divider';
-        bar.appendChild(dividerEl);
+        bar.hidden = true;
 
         chipsEl = document.createElement('span');
         chipsEl.className = 'gky-chips';
@@ -215,7 +192,7 @@
                 clearTimeout(t);
                 t = setTimeout(function () {
                     ensureBar();
-                    updateCount();
+                    renderChips();
                 }, 120);
             }).observe(main, { childList: true, subtree: true });
         }
