@@ -26,7 +26,8 @@ class Geschenkly_Analytics_Plugin {
 		add_action( 'geschenkly_rollup_popularity', array( $this, 'rollup_popularity' ) );
 		// Trending-Badge auf den Listing-/Kategorie-Karten (server-seitig, cache-sicher).
 		add_action( 'woocommerce_before_shop_loop_item_title', array( $this, 'render_trending_badge' ), 8 );
-		add_action( 'wp_head', array( $this, 'print_listing_badge_styles' ) );
+		// Markentreues Archiv-/Kategorie-Stylesheet (nur auf Shop-/Kategorie-/Tag-Seiten).
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_archive_styles' ) );
 		add_action(
 			'rest_api_init',
 			function () {
@@ -228,20 +229,26 @@ class Geschenkly_Analytics_Plugin {
 	}
 
 	/**
-	 * Minimales Badge-CSS, nur auf Shop-/Kategorie-/Tag-Archiven (inline, kein Extra-Request).
+	 * Laedt das markentreue Archiv-/Kategorie-Stylesheet – nur auf Shop-/Kategorie-/
+	 * Tag-Archiven. filemtime als Version => Browser/Page-Cache bricht bei jeder
+	 * Dateiaenderung automatisch. Enthaelt auch das Trending-Badge-Styling.
 	 */
-	public function print_listing_badge_styles() {
+	public function enqueue_archive_styles() {
 		if ( ! function_exists( 'is_shop' ) ) {
 			return;
 		}
 		if ( ! ( is_shop() || is_product_category() || is_product_tag() ) ) {
 			return;
 		}
-		echo '<style id="geschenkly-trend-badge-css">'
-			. '.geschenkly-trend-badge{display:inline-block;margin:6px 0 2px;padding:3px 10px;'
-			. 'border-radius:999px;background:#fff4e0;color:#8a5a00;border:1px solid #f0d8a6;'
-			. 'font-size:12px;font-weight:700;line-height:1.4;letter-spacing:.01em;}'
-			. '</style>';
+
+		$path = plugin_dir_path( __FILE__ ) . 'assets/css/archive.css';
+		$ver  = file_exists( $path ) ? filemtime( $path ) : GESCHENKLY_ANALYTICS_VERSION;
+		wp_enqueue_style(
+			'geschenkly-archive',
+			plugin_dir_url( __FILE__ ) . 'assets/css/archive.css',
+			array(),
+			$ver
+		);
 	}
 
 	/**
