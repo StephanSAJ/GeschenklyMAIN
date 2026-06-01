@@ -571,3 +571,93 @@
         transform: none !important;
     }
 }
+
+/* --------------------------------------------------------------------- */
+/* Filter-Sidebar (BeRocket) – modernes, markentreues Styling             */
+/* --------------------------------------------------------------------- */
+/* Loest den 2012-Look ab: native Checkboxen + Trennlinien unter jeder    */
+/* Zeile + blasse Typografie. Wir entfernen die Linien, faerben die       */
+/* Checkbox golden, machen Zeilen tippbar und die Gruppentitel klarer.    */
+
+/* Widget-Titel ("Für wen suchst du ein Geschenk?") */
+.woocommerce .widget .widgettitle,
+.sidebar .widget .widgettitle,
+.widget .widgettitle {
+    color: var(--gk-ink);
+    font-weight: 800;
+    font-size: 1.18rem;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+}
+
+/* Gruppentitel: Geschlecht / Alter / Geschenk-Typ */
+.bapf_head p {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--gk-muted) !important;
+    padding-top: 16px !important;
+    margin-bottom: 8px !important;
+}
+
+/* Optische Trennung zwischen den Filtergruppen (statt Zeilen-Unterstriche) */
+.bapf_sfilter {
+    border-top: 1px solid var(--gk-line);
+    padding-top: 2px;
+    margin-bottom: 8px !important;
+}
+
+/* Zeilen: keine Trennlinien mehr, sauberes Raster */
+.bapf_sfilter ul li {
+    border-bottom: 0 !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 1px 0 !important;
+}
+
+/* Label als tippbare, abgerundete Zeile */
+.bapf_sfilter.bapf_ckbox label {
+    display: inline-flex !important;
+    align-items: center;
+    margin: 1px 0 !important;
+    padding: 6px 8px !important;
+    border-radius: 10px;
+    color: var(--gk-text);
+    font-size: 15px !important;
+    line-height: 1.25;
+    transition: background .12s ease, color .12s ease;
+}
+.bapf_sfilter.bapf_ckbox label:hover,
+.bapf_sfilter.bapf_ckbox label:focus-within {
+    background: var(--gk-gold-soft);
+    color: var(--gk-ink);
+}
+
+/* Checkbox in Markenfarbe, etwas groesser, sauber ausgerichtet */
+.bapf_sfilter.bapf_ckbox input[type=checkbox] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--gk-gold);
+    cursor: pointer;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+/* "Filter zuruecksetzen"/Buttons des Plugins markentreu */
+.bapf_pricefield input[type=submit],
+.berocket_filter_button,
+.bapf_button_clearall a,
+a.bapf_clear_all {
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+}
+
+/* Kopfbereich: Section-Ueberschrift "Geschenke für jeden Anlass!" */
+.woocommerce .term-description h3 {
+    color: var(--gk-ink);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 .55em;
+}
