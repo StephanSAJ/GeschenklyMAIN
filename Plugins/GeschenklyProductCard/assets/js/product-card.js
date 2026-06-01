@@ -29,19 +29,23 @@ jQuery(document).ready(function($) {
 
     // 'Zum Shop'-Klick als Interessensignal erfassen (staerkstes Signal: Kaufabsicht).
     // keepalive, damit der Request auch beim Oeffnen des neuen Tabs sicher rausgeht.
-    var shopBtn = document.getElementById('shopButton');
-    if (shopBtn) {
-        shopBtn.addEventListener('click', function() {
-            try {
-                fetch(API_BASE + 'click', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ productId: productId }),
-                    keepalive: true
-                });
-            } catch (e) { /* Tracking darf den Klick nie blockieren */ }
-        });
-    }
+    //
+    // Event-Delegation statt direkter Bindung an #shopButton: shop-button.js
+    // klont den Button beim Scrollen in einen fixierten Footer (mobil). Ein Klon
+    // uebernimmt zwar das onclick-Attribut, aber KEINE per addEventListener
+    // gebundenen Listener – sonst wuerde der Footer-Button (haeufigster Klick auf
+    // Mobil) nie getrackt und 'Kaufwunsch letzte 30 Tage' bliebe bei 0.
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#shopButton')) return;
+        try {
+            fetch(API_BASE + 'click', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: productId }),
+                keepalive: true
+            });
+        } catch (err) { /* Tracking darf den Klick nie blockieren */ }
+    }, true);
 
     // Laden der Popularitätsdaten
     $.ajax({
