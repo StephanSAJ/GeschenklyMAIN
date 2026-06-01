@@ -335,18 +335,18 @@
 }
 
 /* --------------------------------------------------------------------- */
-/* Theme-"Zoom"-Layout neutralisieren -> CTA immer sichtbar (Konversion)  */
+/* CTA immer sichtbar & unten -> layout-unabhaengig (Konversion)          */
 /* --------------------------------------------------------------------- */
-/* Standardmaessig versteckt das Theme den Button (visibility:hidden,     */
-/* height:0, position:absolute) und zeigt ihn erst beim Hover an einer    */
-/* unguenstigen Stelle (Karte springt auf 130%). Auf Touch/Mobil gibt es  */
-/* keinen Hover -> der CTA ist unsichtbar. Wir halten den Button dauerhaft */
-/* sichtbar, im Fluss und unten in der Karte.                              */
+/* Das Theme versteckt den Button (visibility:hidden, height:0,           */
+/* position:absolute) und zeigt ihn erst beim Hover OBEN an (Karte springt */
+/* auf 130%). Das ist auf Touch unsichtbar und am Desktop laestig (Maus    */
+/* muss hoch). Wir erzwingen layout-unabhaengig (zoom/flip/grid/masonry):  */
+/* Button dauerhaft sichtbar, im Fluss, fest UNTEN in der Karte.           */
 
-.woocommerce ul.products li.product.grid .product-wrapper.zoom,
-.woocommerce ul.products li.product .product-wrapper.zoom,
-.woocommerce ul.products li.product.grid:hover .product-wrapper.zoom,
-.woocommerce ul.products li.product:hover .product-wrapper.zoom {
+/* Karte: jede Hover-/Zoom-Vergroesserung neutralisieren */
+.woocommerce ul.products li.product .product-wrapper,
+.woocommerce ul.products li.product:hover .product-wrapper,
+.woocommerce ul.products li.product.grid:hover .product-wrapper.zoom {
     width: 100% !important;
     left: 0 !important;
     top: 0 !important;
@@ -354,21 +354,30 @@
     z-index: auto !important;
 }
 
-.woocommerce ul.products li.product .product-wrapper.zoom .product-actions-wrapper {
+/* Aktions-Container: aus dem Hover-Overlay zurueck in den normalen Fluss */
+.woocommerce ul.products li.product .product-wrapper .product-actions-wrapper {
     position: static !important;
     visibility: visible !important;
+    opacity: 1 !important;
     height: auto !important;
+    width: auto !important;
     min-width: 0 !important;
+    top: auto !important;
+    bottom: auto !important;
     left: auto !important;
     right: auto !important;
     overflow: visible !important;
+    margin-top: auto; /* schiebt den CTA in der Flex-Karte nach unten */
 }
 
-.woocommerce ul.products li.product .product-wrapper.zoom .product-actions {
+.woocommerce ul.products li.product .product-wrapper .product-actions {
     position: static !important;
+    visibility: visible !important;
     top: auto !important;
+    bottom: auto !important;
     left: auto !important;
     right: auto !important;
+    height: auto !important;
     padding: 0 !important;
     border: 0 !important;
     background: transparent !important;
