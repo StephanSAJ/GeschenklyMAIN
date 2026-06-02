@@ -228,6 +228,7 @@ body {
     color: var(--gk-muted);
     margin: 12px auto 0;
     max-width: 460px;
+    text-align: center;
 }
 
 /* --- Eigenschaften-Grid ------------------------------------------------ */

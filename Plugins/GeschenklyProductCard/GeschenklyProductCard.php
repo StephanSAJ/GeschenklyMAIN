@@ -382,12 +382,12 @@ function geschenkly_enqueue_assets() {
         $url  = plugin_dir_url(__FILE__);
         // filemtime als Version => Cache bricht automatisch bei jeder Dateiaenderung
         // (verhindert, dass Browser/Page-Cache veraltetes CSS/JS ausliefern).
-        $css_ver  = file_exists($base . 'assets/css/style-v3.css') ? filemtime($base . 'assets/css/style-v3.css') : null;
+        $css_ver  = file_exists($base . 'assets/css/style-v4.css') ? filemtime($base . 'assets/css/style-v4.css') : null;
         $card_ver = file_exists($base . 'assets/js/product-card-v3.js') ? filemtime($base . 'assets/js/product-card-v3.js') : null;
         $shop_ver = file_exists($base . 'assets/js/shop-button.js') ? filemtime($base . 'assets/js/shop-button.js') : null;
         $wish_ver = file_exists($base . 'assets/js/wishlist-header.js') ? filemtime($base . 'assets/js/wishlist-header.js') : null;
 
-        wp_enqueue_style('geschenkly-style', $url . 'assets/css/style-v3.css', array(), $css_ver);
+        wp_enqueue_style('geschenkly-style', $url . 'assets/css/style-v4.css', array(), $css_ver);
         // Chart.js lokal gehostet (gepinnte Version) statt vom CDN – spart einen externen Host & DNS/TLS-Handshake.
         wp_enqueue_script('chart-js', $url . 'assets/vendor/chart.umd.min.js', array(), '4.4.1', true);
         wp_enqueue_script('geschenkly-shop-button', $url . 'assets/js/shop-button.js', array('jquery'), $shop_ver, true);
