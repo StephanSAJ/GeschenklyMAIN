@@ -180,21 +180,18 @@ class Geschenkly_Analytics_Plugin {
 		$cache_key = 'gky_topcat_ids2_' . $term_id . '_' . $limit;
 		$ids       = get_transient( $cache_key );
 		if ( false === $ids ) {
-			// WICHTIG: dieselbe Rangordnung wie die Kategorie-Liste verwenden,
-			// damit "Top N in {Kategorie}" auf den tatsaechlich zuerst gezeigten
-			// Produkten landet. Die Liste sortiert nach dem kategorie-eigenen
-			// Rating (bzw. dem globalen pop_score, wenn Event-Sort aktiviert ist).
-			$sort_key = ( get_option( 'geschenkly_use_event_sort' ) === 'yes' )
-				? '_geschenkly_pop_score'
-				: '_category_rating_' . $term_id;
-
+			// Bewusst NACH echter Klick-Beliebtheit (_geschenkly_pop_score) ranken –
+			// NICHT nach der Listen-Sortierung. Sonst waere "Top N" nur "das N-te
+			// Produkt von oben" und damit redundant. So zeigt das Badge die wirklich
+			// am haeufigsten angeklickten Produkte der Kategorie (Social Proof),
+			// unabhaengig von der Anzeige-Reihenfolge.
 			$ids = get_posts(
 				array(
 					'post_type'              => 'product',
 					'post_status'            => 'publish',
 					'fields'                 => 'ids',
 					'posts_per_page'         => $limit,
-					'meta_key'               => $sort_key,
+					'meta_key'               => '_geschenkly_pop_score',
 					'orderby'                => 'meta_value_num',
 					'order'                  => 'DESC',
 					'no_found_rows'          => true,
