@@ -224,10 +224,12 @@ body {
 #shopButton:active { transform: translateY(0); }
 
 .cart-notiz {
+    display: block;
+    width: 100%;
+    max-width: 520px;
+    margin: 12px auto 0;
     font-size: 12px;
     color: var(--gk-muted);
-    margin: 12px auto 0;
-    max-width: 460px;
     text-align: center;
 }
 
