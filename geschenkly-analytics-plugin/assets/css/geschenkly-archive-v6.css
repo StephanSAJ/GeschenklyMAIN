@@ -663,6 +663,12 @@
         padding: 18px 18px 10px;
         box-shadow: var(--gk-shadow);
     }
+
+    /* Abstand zwischen Sidebar und Inhalt: linkes Padding auf der Inhaltsspalte.
+       border-box => keine Spaltenbreiten-Aenderung, kein Float-Umbruch. */
+    .content.col-sm-push-3 {
+        padding-left: 28px;
+    }
 }
 
 /* Filter-Haupttitel ("Für wen suchst du ein Geschenk?") + Widget-Titel */
